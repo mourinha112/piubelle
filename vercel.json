@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx nuxi build",
-  "installCommand": "npm install",
+  "buildCommand": "node node_modules/nuxi/bin/nuxi.mjs build",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": "nuxtjs"
 }
