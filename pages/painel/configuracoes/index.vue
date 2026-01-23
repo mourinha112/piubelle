@@ -1,0 +1,545 @@
+<template>
+  <div class="space-y-6">
+    <!-- Tabs -->
+    <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+      <button 
+        v-for="tab in tabs"
+        :key="tab.id"
+        :class="[
+          'px-5 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all text-sm flex items-center gap-2',
+          activeTab === tab.id 
+            ? 'bg-gradient-to-r from-lilac-500 to-rose-500 text-white shadow-glow' 
+            : 'bg-white border border-lilac-100 text-gray-600 hover:border-lilac-200'
+        ]"
+        @click="activeTab = tab.id"
+      >
+        <Icon :name="tab.icon" class="w-4 h-4" />
+        {{ tab.label }}
+      </button>
+    </div>
+
+    <!-- Informações do Salão -->
+    <div v-if="activeTab === 'general'" class="space-y-6">
+      <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
+        <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Informações do Salão</h2>
+        
+        <form @submit.prevent="saveGeneral" class="space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Salão *</label>
+              <input
+                v-model="settings.name"
+                type="text"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Slug (URL)</label>
+              <div class="flex items-center">
+                <span class="px-3 py-3 rounded-l-xl bg-gray-100 border border-r-0 border-lilac-100 text-gray-500 text-sm">
+                  piubelle.com/
+                </span>
+                <input
+                  v-model="settings.slug"
+                  type="text"
+                  class="flex-1 px-4 py-3 rounded-r-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+            <textarea
+              v-model="settings.description"
+              rows="3"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all resize-none"
+              placeholder="Descreva seu salão de beleza..."
+            />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
+              <input
+                v-model="settings.phone"
+                type="tel"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+                placeholder="(00) 0000-0000"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">WhatsApp</label>
+              <input
+                v-model="settings.whatsapp"
+                type="tel"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+                placeholder="(00) 00000-0000"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
+              <input
+                v-model="settings.email"
+                type="email"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+                placeholder="contato@seusalao.com"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+              <input
+                v-model="settings.website"
+                type="url"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+                placeholder="https://seusalao.com"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
+              <div class="flex items-center">
+                <span class="px-3 py-3 rounded-l-xl bg-gray-100 border border-r-0 border-lilac-100 text-gray-500">
+                  <Icon name="mdi:instagram" class="w-5 h-5" />
+                </span>
+                <input
+                  v-model="settings.instagram"
+                  type="text"
+                  class="flex-1 px-4 py-3 rounded-r-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+                  placeholder="@seusalao"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Facebook</label>
+              <div class="flex items-center">
+                <span class="px-3 py-3 rounded-l-xl bg-gray-100 border border-r-0 border-lilac-100 text-gray-500">
+                  <Icon name="mdi:facebook" class="w-5 h-5" />
+                </span>
+                <input
+                  v-model="settings.facebook"
+                  type="text"
+                  class="flex-1 px-4 py-3 rounded-r-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+                  placeholder="facebook.com/seusalao"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <button 
+              type="submit"
+              :disabled="saving"
+              class="px-6 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold hover:from-lilac-600 hover:to-rose-600 disabled:opacity-50 transition-all flex items-center gap-2 shadow-glow"
+            >
+              <Icon v-if="saving" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+              <Icon v-else name="lucide:save" class="w-5 h-5" />
+              Salvar Alterações
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Endereço -->
+      <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
+        <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Endereço</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Rua/Avenida</label>
+            <input
+              v-model="settings.addressStreet"
+              type="text"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Número</label>
+            <input
+              v-model="settings.addressNumber"
+              type="text"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
+            <input
+              v-model="settings.addressComplement"
+              type="text"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+              placeholder="Sala, Bloco..."
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Bairro</label>
+            <input
+              v-model="settings.addressNeighborhood"
+              type="text"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">CEP</label>
+            <input
+              v-model="settings.addressZipcode"
+              type="text"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+              placeholder="00000-000"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
+            <input
+              v-model="settings.addressCity"
+              type="text"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+            <select
+              v-model="settings.addressState"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+            >
+              <option value="">Selecione</option>
+              <option v-for="state in states" :key="state.value" :value="state.value">{{ state.label }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Horário de Funcionamento -->
+    <div v-if="activeTab === 'hours'" class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
+      <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Horário de Funcionamento</h2>
+      
+      <div class="space-y-4">
+        <div 
+          v-for="day in workingHours" 
+          :key="day.dayOfWeek"
+          class="flex items-center gap-4 p-4 rounded-xl bg-gray-50"
+        >
+          <label class="flex items-center gap-3 w-40">
+            <input 
+              type="checkbox" 
+              v-model="day.isOpen" 
+              class="w-5 h-5 rounded border-gray-300 text-lilac-500 focus:ring-lilac-400"
+            />
+            <span class="font-medium text-gray-700">{{ day.label }}</span>
+          </label>
+
+          <div v-if="day.isOpen" class="flex items-center gap-3 flex-1">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-500">Abre:</span>
+              <input 
+                type="time" 
+                v-model="day.openTime"
+                class="px-3 py-2 rounded-lg bg-white border border-lilac-100 text-gray-800 focus:border-lilac-400 outline-none"
+              />
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-500">Fecha:</span>
+              <input 
+                type="time" 
+                v-model="day.closeTime"
+                class="px-3 py-2 rounded-lg bg-white border border-lilac-100 text-gray-800 focus:border-lilac-400 outline-none"
+              />
+            </div>
+            <div class="flex items-center gap-2 ml-4">
+              <label class="flex items-center gap-2 text-sm text-gray-500">
+                <input type="checkbox" v-model="day.hasBreak" class="w-4 h-4 rounded border-gray-300 text-lilac-500" />
+                Intervalo
+              </label>
+              <template v-if="day.hasBreak">
+                <input 
+                  type="time" 
+                  v-model="day.breakStart"
+                  class="px-3 py-2 rounded-lg bg-white border border-lilac-100 text-gray-800 focus:border-lilac-400 outline-none"
+                />
+                <span class="text-gray-400">-</span>
+                <input 
+                  type="time" 
+                  v-model="day.breakEnd"
+                  class="px-3 py-2 rounded-lg bg-white border border-lilac-100 text-gray-800 focus:border-lilac-400 outline-none"
+                />
+              </template>
+            </div>
+          </div>
+          <span v-else class="text-gray-400 text-sm">Fechado</span>
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-6">
+        <button class="px-6 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold hover:from-lilac-600 hover:to-rose-600 transition-all flex items-center gap-2 shadow-glow">
+          <Icon name="lucide:save" class="w-5 h-5" />
+          Salvar Horários
+        </button>
+      </div>
+    </div>
+
+    <!-- Agendamento -->
+    <div v-if="activeTab === 'booking'" class="space-y-6">
+      <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
+        <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Configurações de Agendamento</h2>
+
+        <div class="space-y-6">
+          <div class="flex items-center justify-between p-4 rounded-xl bg-gray-50">
+            <div>
+              <h3 class="font-medium text-gray-800">Confirmação automática</h3>
+              <p class="text-sm text-gray-500">Confirmar agendamentos automaticamente</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" v-model="settings.autoConfirmBooking" class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lilac-500"></div>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Antecedência máxima (dias)</label>
+              <input
+                v-model="settings.bookingAdvanceDays"
+                type="number"
+                min="1"
+                max="90"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+              />
+              <p class="text-xs text-gray-400 mt-1">Quantos dias no futuro clientes podem agendar</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Cancelamento (horas antes)</label>
+              <input
+                v-model="settings.bookingCancelHours"
+                type="number"
+                min="1"
+                max="48"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+              />
+              <p class="text-xs text-gray-400 mt-1">Tempo mínimo para cancelar sem penalidade</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-4 rounded-xl bg-gray-50">
+            <div>
+              <h3 class="font-medium text-gray-800">Exigir depósito antecipado</h3>
+              <p class="text-sm text-gray-500">Cobrar um valor antecipado para confirmar o agendamento</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" v-model="settings.requireDeposit" class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lilac-500"></div>
+            </label>
+          </div>
+
+          <div v-if="settings.requireDeposit">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Percentual do depósito (%)</label>
+            <input
+              v-model="settings.depositPercentage"
+              type="number"
+              min="1"
+              max="100"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-6">
+          <button class="px-6 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold hover:from-lilac-600 hover:to-rose-600 transition-all flex items-center gap-2 shadow-glow">
+            <Icon name="lucide:save" class="w-5 h-5" />
+            Salvar Configurações
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagamentos -->
+    <div v-if="activeTab === 'payments'" class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
+      <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Formas de Pagamento</h2>
+
+      <div class="space-y-4">
+        <div v-for="method in paymentMethods" :key="method.id" class="flex items-center justify-between p-4 rounded-xl bg-gray-50">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="method.bgClass">
+              <Icon :name="method.icon" class="w-5 h-5" :class="method.iconClass" />
+            </div>
+            <span class="font-medium text-gray-700">{{ method.label }}</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" v-model="method.enabled" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lilac-500"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- PIX Config -->
+      <div class="mt-6 p-4 rounded-xl bg-lilac-50 border border-lilac-200">
+        <h3 class="font-medium text-lilac-700 mb-4">Configuração do PIX</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de chave</label>
+            <select class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-800 focus:border-lilac-400 outline-none transition-all">
+              <option value="cpf">CPF</option>
+              <option value="cnpj">CNPJ</option>
+              <option value="email">E-mail</option>
+              <option value="phone">Telefone</option>
+              <option value="random">Chave aleatória</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Chave PIX</label>
+            <input
+              type="text"
+              class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-800 focus:border-lilac-400 outline-none transition-all"
+              placeholder="Sua chave PIX"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notificações -->
+    <div v-if="activeTab === 'notifications'" class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
+      <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Notificações</h2>
+
+      <div class="space-y-4">
+        <div v-for="notification in notificationSettings" :key="notification.id" class="flex items-center justify-between p-4 rounded-xl bg-gray-50">
+          <div>
+            <h3 class="font-medium text-gray-800">{{ notification.title }}</h3>
+            <p class="text-sm text-gray-500">{{ notification.description }}</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" v-model="notification.enabled" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lilac-500"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+definePageMeta({
+  layout: 'painel'
+})
+
+const activeTab = ref('general')
+const saving = ref(false)
+
+const tabs = [
+  { id: 'general', label: 'Geral', icon: 'lucide:building-2' },
+  { id: 'hours', label: 'Horários', icon: 'lucide:clock' },
+  { id: 'booking', label: 'Agendamento', icon: 'lucide:calendar' },
+  { id: 'payments', label: 'Pagamentos', icon: 'lucide:credit-card' },
+  { id: 'notifications', label: 'Notificações', icon: 'lucide:bell' }
+]
+
+const settings = ref({
+  name: 'Studio Belle Hair',
+  slug: 'studio-belle-hair',
+  description: 'Salão de beleza completo com profissionais especializados em corte, coloração, tratamentos capilares e muito mais.',
+  phone: '(79) 3211-0000',
+  whatsapp: '(79) 99999-9999',
+  email: 'contato@studiobelle.com',
+  website: 'https://studiobelle.com',
+  instagram: '@studiobellehair',
+  facebook: 'studiobellehair',
+  addressStreet: 'Av. Beira Mar',
+  addressNumber: '1500',
+  addressComplement: 'Sala 101',
+  addressNeighborhood: 'Centro',
+  addressCity: 'Aracaju',
+  addressState: 'SE',
+  addressZipcode: '49000-000',
+  autoConfirmBooking: false,
+  bookingAdvanceDays: 30,
+  bookingCancelHours: 2,
+  requireDeposit: false,
+  depositPercentage: 20
+})
+
+const workingHours = ref([
+  { dayOfWeek: 0, label: 'Domingo', isOpen: false, openTime: '09:00', closeTime: '18:00', hasBreak: false, breakStart: '12:00', breakEnd: '13:00' },
+  { dayOfWeek: 1, label: 'Segunda', isOpen: true, openTime: '09:00', closeTime: '19:00', hasBreak: true, breakStart: '12:00', breakEnd: '13:00' },
+  { dayOfWeek: 2, label: 'Terça', isOpen: true, openTime: '09:00', closeTime: '19:00', hasBreak: true, breakStart: '12:00', breakEnd: '13:00' },
+  { dayOfWeek: 3, label: 'Quarta', isOpen: true, openTime: '09:00', closeTime: '19:00', hasBreak: true, breakStart: '12:00', breakEnd: '13:00' },
+  { dayOfWeek: 4, label: 'Quinta', isOpen: true, openTime: '09:00', closeTime: '19:00', hasBreak: true, breakStart: '12:00', breakEnd: '13:00' },
+  { dayOfWeek: 5, label: 'Sexta', isOpen: true, openTime: '09:00', closeTime: '19:00', hasBreak: true, breakStart: '12:00', breakEnd: '13:00' },
+  { dayOfWeek: 6, label: 'Sábado', isOpen: true, openTime: '09:00', closeTime: '17:00', hasBreak: false, breakStart: '12:00', breakEnd: '13:00' }
+])
+
+const paymentMethods = ref([
+  { id: 'cash', label: 'Dinheiro', icon: 'lucide:banknote', bgClass: 'bg-emerald-100', iconClass: 'text-emerald-600', enabled: true },
+  { id: 'pix', label: 'PIX', icon: 'lucide:qr-code', bgClass: 'bg-cyan-100', iconClass: 'text-cyan-600', enabled: true },
+  { id: 'credit_card', label: 'Cartão de Crédito', icon: 'lucide:credit-card', bgClass: 'bg-blue-100', iconClass: 'text-blue-600', enabled: true },
+  { id: 'debit_card', label: 'Cartão de Débito', icon: 'lucide:wallet', bgClass: 'bg-indigo-100', iconClass: 'text-indigo-600', enabled: true },
+  { id: 'transfer', label: 'Transferência', icon: 'lucide:arrow-right-left', bgClass: 'bg-purple-100', iconClass: 'text-purple-600', enabled: false }
+])
+
+const notificationSettings = ref([
+  { id: 'new_appointment', title: 'Novo agendamento', description: 'Receber notificação quando um cliente agendar', enabled: true },
+  { id: 'appointment_cancelled', title: 'Agendamento cancelado', description: 'Receber notificação quando um agendamento for cancelado', enabled: true },
+  { id: 'new_review', title: 'Nova avaliação', description: 'Receber notificação quando receber uma nova avaliação', enabled: true },
+  { id: 'appointment_reminder', title: 'Lembrete de agendamento', description: 'Enviar lembrete aos clientes antes do horário', enabled: true },
+  { id: 'daily_report', title: 'Relatório diário', description: 'Receber resumo do dia por e-mail', enabled: false }
+])
+
+const states = [
+  { value: 'AC', label: 'Acre' },
+  { value: 'AL', label: 'Alagoas' },
+  { value: 'AP', label: 'Amapá' },
+  { value: 'AM', label: 'Amazonas' },
+  { value: 'BA', label: 'Bahia' },
+  { value: 'CE', label: 'Ceará' },
+  { value: 'DF', label: 'Distrito Federal' },
+  { value: 'ES', label: 'Espírito Santo' },
+  { value: 'GO', label: 'Goiás' },
+  { value: 'MA', label: 'Maranhão' },
+  { value: 'MT', label: 'Mato Grosso' },
+  { value: 'MS', label: 'Mato Grosso do Sul' },
+  { value: 'MG', label: 'Minas Gerais' },
+  { value: 'PA', label: 'Pará' },
+  { value: 'PB', label: 'Paraíba' },
+  { value: 'PR', label: 'Paraná' },
+  { value: 'PE', label: 'Pernambuco' },
+  { value: 'PI', label: 'Piauí' },
+  { value: 'RJ', label: 'Rio de Janeiro' },
+  { value: 'RN', label: 'Rio Grande do Norte' },
+  { value: 'RS', label: 'Rio Grande do Sul' },
+  { value: 'RO', label: 'Rondônia' },
+  { value: 'RR', label: 'Roraima' },
+  { value: 'SC', label: 'Santa Catarina' },
+  { value: 'SP', label: 'São Paulo' },
+  { value: 'SE', label: 'Sergipe' },
+  { value: 'TO', label: 'Tocantins' }
+]
+
+const saveGeneral = async () => {
+  saving.value = true
+  
+  try {
+    // Em produção, chamaria a API
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Mostrar toast de sucesso
+  } catch (error) {
+    // Mostrar erro
+  } finally {
+    saving.value = false
+  }
+}
+</script>
