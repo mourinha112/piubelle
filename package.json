@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview"
+    "build": "npx nuxi build",
+    "dev": "npx nuxi dev",
+    "generate": "npx nuxi generate",
+    "preview": "npx nuxi preview"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.18",
