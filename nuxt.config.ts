@@ -6,6 +6,10 @@ export default defineNuxtConfig({
     port: 3001
   },
 
+  nitro: {
+    preset: 'vercel'
+  },
+
   modules: [
     '@nuxt/ui',
     '@nuxt/image',
