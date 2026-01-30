@@ -93,9 +93,12 @@
 
         <!-- Actions -->
         <div class="flex gap-2">
-          <button class="flex-1 py-2 rounded-xl bg-lilac-50 text-lilac-600 text-sm font-medium hover:bg-lilac-100 transition-all">
+          <NuxtLink 
+            :to="`/painel/agendamentos?professionalId=${professional.id}`"
+            class="flex-1 py-2 rounded-xl bg-lilac-50 text-lilac-600 text-sm font-medium hover:bg-lilac-100 transition-all text-center"
+          >
             Ver agenda
-          </button>
+          </NuxtLink>
           <button 
             @click="editProfessional(professional)"
             class="flex-1 py-2 rounded-xl bg-gray-50 text-gray-600 text-sm font-medium hover:bg-gray-100 transition-all"

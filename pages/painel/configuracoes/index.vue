@@ -136,7 +136,11 @@
             </div>
           </div>
 
-          <div class="flex justify-end">
+          <div class="flex items-center justify-end gap-3">
+            <span v-if="saved" class="text-emerald-600 text-sm font-medium flex items-center gap-1">
+              <Icon name="lucide:check-circle" class="w-4 h-4" />
+              Salvo com sucesso!
+            </span>
             <button 
               type="submit"
               :disabled="saving"
@@ -438,8 +442,13 @@ definePageMeta({
   layout: 'painel'
 })
 
+const { authHeaders } = useAuth()
+const currentSalon = inject('currentSalon') as Ref<any>
+
 const activeTab = ref('general')
 const saving = ref(false)
+const loading = ref(false)
+const saved = ref(false)
 
 const tabs = [
   { id: 'general', label: 'Geral', icon: 'lucide:building-2' },
@@ -530,16 +539,92 @@ const states = [
 ]
 
 const saveGeneral = async () => {
+  if (!currentSalon.value?.id) return
+  
   saving.value = true
+  saved.value = false
   
   try {
-    // Em produção, chamaria a API
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    // Mostrar toast de sucesso
+    await $fetch(`/api/painel/salon/${currentSalon.value.id}`, {
+      method: 'PUT',
+      headers: authHeaders.value,
+      body: {
+        name: settings.value.name,
+        slug: settings.value.slug,
+        description: settings.value.description,
+        phone: settings.value.phone,
+        whatsapp: settings.value.whatsapp,
+        email: settings.value.email,
+        website: settings.value.website,
+        instagram: settings.value.instagram,
+        facebook: settings.value.facebook,
+        addressStreet: settings.value.addressStreet,
+        addressNumber: settings.value.addressNumber,
+        addressComplement: settings.value.addressComplement,
+        addressNeighborhood: settings.value.addressNeighborhood,
+        addressCity: settings.value.addressCity,
+        addressState: settings.value.addressState,
+        addressZipcode: settings.value.addressZipcode,
+        autoConfirmBooking: settings.value.autoConfirmBooking,
+        bookingAdvanceDays: settings.value.bookingAdvanceDays,
+        bookingCancelHours: settings.value.bookingCancelHours,
+        requireDeposit: settings.value.requireDeposit,
+        depositPercentage: settings.value.depositPercentage
+      }
+    })
+    
+    // Update currentSalon with new name if changed
+    if (currentSalon.value) {
+      currentSalon.value.name = settings.value.name
+      currentSalon.value.slug = settings.value.slug
+    }
+    
+    saved.value = true
+    setTimeout(() => { saved.value = false }, 3000)
   } catch (error) {
-    // Mostrar erro
+    console.error('Erro ao salvar configurações:', error)
+    alert('Erro ao salvar configurações')
   } finally {
     saving.value = false
   }
 }
+
+// Load current salon data into settings
+const loadSalonSettings = () => {
+  if (!currentSalon.value) return
+  
+  const s = currentSalon.value
+  settings.value = {
+    name: s.name || '',
+    slug: s.slug || '',
+    description: s.description || '',
+    phone: s.phone || '',
+    whatsapp: s.whatsapp || '',
+    email: s.email || '',
+    website: s.website || '',
+    instagram: s.instagram || '',
+    facebook: s.facebook || '',
+    addressStreet: s.address_street || s.addressStreet || '',
+    addressNumber: s.address_number || s.addressNumber || '',
+    addressComplement: s.address_complement || s.addressComplement || '',
+    addressNeighborhood: s.address_neighborhood || s.addressNeighborhood || '',
+    addressCity: s.address_city || s.addressCity || '',
+    addressState: s.address_state || s.addressState || '',
+    addressZipcode: s.address_zipcode || s.addressZipcode || '',
+    autoConfirmBooking: s.auto_confirm_booking ?? s.autoConfirmBooking ?? false,
+    bookingAdvanceDays: s.booking_advance_days ?? s.bookingAdvanceDays ?? 30,
+    bookingCancelHours: s.booking_cancel_hours ?? s.bookingCancelHours ?? 2,
+    requireDeposit: s.require_deposit ?? s.requireDeposit ?? false,
+    depositPercentage: s.deposit_percentage ?? s.depositPercentage ?? 20
+  }
+}
+
+// Watch for salon changes
+watch(() => currentSalon.value?.id, () => {
+  loadSalonSettings()
+}, { immediate: true })
+
+onMounted(() => {
+  loadSalonSettings()
+})
 </script>

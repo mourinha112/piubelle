@@ -167,14 +167,24 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
-              <select
-                v-model="newAppointment.clientId"
-                class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none"
-                required
-              >
-                <option value="">Selecione um cliente</option>
-                <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.name }}</option>
-              </select>
+              <div class="flex gap-2">
+                <select
+                  v-model="newAppointment.clientId"
+                  class="flex-1 px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none"
+                  required
+                >
+                  <option value="">Selecione um cliente</option>
+                  <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.name }}</option>
+                </select>
+                <button 
+                  type="button"
+                  @click="showQuickClientModal = true"
+                  class="px-3 py-2 rounded-xl bg-lilac-50 text-lilac-600 hover:bg-lilac-100 transition-colors"
+                  title="Cadastro rápido de cliente"
+                >
+                  <Icon name="lucide:user-plus" class="w-5 h-5" />
+                </button>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Profissional</label>
@@ -254,6 +264,63 @@
         </form>
       </div>
     </UModal>
+
+    <!-- Modal Cadastro Rápido de Cliente -->
+    <UModal v-model="showQuickClientModal" :ui="{ width: 'max-w-md' }">
+      <div class="p-6">
+        <h2 class="text-xl font-display font-semibold text-gray-800 mb-6">Cadastro Rápido de Cliente</h2>
+        
+        <form @submit.prevent="createQuickClient" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
+            <input
+              v-model="quickClientForm.name"
+              type="text"
+              placeholder="Nome do cliente"
+              class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none"
+              required
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
+            <input
+              v-model="quickClientForm.phone"
+              type="tel"
+              placeholder="(00) 00000-0000"
+              class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
+            <input
+              v-model="quickClientForm.email"
+              type="email"
+              placeholder="email@exemplo.com"
+              class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none"
+            />
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4">
+            <button 
+              type="button"
+              @click="showQuickClientModal = false"
+              class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit"
+              :disabled="creatingClient || !quickClientForm.name"
+              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 disabled:opacity-50 transition-all"
+            >
+              {{ creatingClient ? 'Criando...' : 'Criar e Selecionar' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </UModal>
   </div>
 </template>
 
@@ -265,6 +332,7 @@ definePageMeta({
   layout: 'painel'
 })
 
+const route = useRoute()
 const { authHeaders } = useAuth()
 const currentSalon = inject('currentSalon') as Ref<any>
 
@@ -274,7 +342,24 @@ const selectedStatus = ref('')
 const selectedProfessional = ref('')
 const loading = ref(false)
 const showNewModal = ref(false)
+const showQuickClientModal = ref(false)
 const creating = ref(false)
+const creatingClient = ref(false)
+
+// New quick client form
+const quickClientForm = ref({
+  name: '',
+  phone: '',
+  email: ''
+})
+
+// Read professional filter from URL
+onMounted(() => {
+  const profId = route.query.professionalId as string
+  if (profId) {
+    selectedProfessional.value = profId
+  }
+})
 
 const appointments = ref<any[]>([])
 const clients = ref<any[]>([])
@@ -386,6 +471,7 @@ const createAppointment = async () => {
         salonId: currentSalon.value.id,
         clientId: newAppointment.value.clientId,
         professionalId: newAppointment.value.professionalId || null,
+        serviceId: newAppointment.value.serviceId,
         date: newAppointment.value.date,
         startTime: newAppointment.value.startTime,
         total: selectedService?.price || 0,
@@ -447,6 +533,42 @@ const sendWhatsApp = (appointment: any) => {
 const cancelAppointment = async (appointment: any) => {
   if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
     await updateStatus(appointment.id, 'cancelled')
+  }
+}
+
+// Criar cliente rapidamente
+const createQuickClient = async () => {
+  if (!quickClientForm.value.name || !currentSalon.value?.id) return
+
+  creatingClient.value = true
+  try {
+    const res = await $fetch('/api/painel/clients', {
+      method: 'POST',
+      headers: authHeaders.value,
+      body: {
+        salonId: currentSalon.value.id,
+        name: quickClientForm.value.name,
+        phone: quickClientForm.value.phone,
+        email: quickClientForm.value.email
+      }
+    })
+
+    const newClient = (res as any).data
+    
+    // Add to clients list
+    clients.value.unshift(newClient)
+    
+    // Select the new client
+    newAppointment.value.clientId = newClient.id
+    
+    // Close modal and reset form
+    showQuickClientModal.value = false
+    quickClientForm.value = { name: '', phone: '', email: '' }
+  } catch (error) {
+    console.error('Erro ao criar cliente:', error)
+    alert('Erro ao criar cliente')
+  } finally {
+    creatingClient.value = false
   }
 }
 

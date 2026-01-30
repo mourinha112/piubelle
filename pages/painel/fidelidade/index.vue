@@ -174,10 +174,20 @@
     </template>
 
     <!-- Config Modal -->
-    <div v-if="showConfigModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
-        <div class="p-6 border-b border-gray-100">
+    <div 
+      v-if="showConfigModal" 
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      @click.self="showConfigModal = false"
+    >
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md" @click.stop>
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
           <h3 class="text-xl font-display font-semibold text-gray-800">Configurar Programa</h3>
+          <button 
+            @click="showConfigModal = false"
+            class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <Icon name="lucide:x" class="w-5 h-5 text-gray-500" />
+          </button>
         </div>
         
         <div class="p-6 space-y-4">

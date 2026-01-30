@@ -113,18 +113,27 @@
         <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
           <h2 class="font-display text-xl font-semibold text-gray-800 mb-4">Ações Rápidas</h2>
           <div class="space-y-3">
-            <button class="w-full flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white hover:from-lilac-600 hover:to-rose-600 transition-all">
+            <NuxtLink 
+              to="/painel/agendamentos" 
+              class="w-full flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white hover:from-lilac-600 hover:to-rose-600 transition-all"
+            >
               <Icon name="lucide:plus" class="w-5 h-5" />
               <span class="font-medium">Novo Agendamento</span>
-            </button>
-            <button class="w-full flex items-center gap-3 p-4 rounded-xl bg-lilac-50 text-lilac-700 hover:bg-lilac-100 transition-all">
+            </NuxtLink>
+            <NuxtLink 
+              to="/painel/clientes" 
+              class="w-full flex items-center gap-3 p-4 rounded-xl bg-lilac-50 text-lilac-700 hover:bg-lilac-100 transition-all"
+            >
               <Icon name="lucide:user-plus" class="w-5 h-5" />
               <span class="font-medium">Adicionar Cliente</span>
-            </button>
-            <button class="w-full flex items-center gap-3 p-4 rounded-xl bg-lilac-50 text-lilac-700 hover:bg-lilac-100 transition-all">
+            </NuxtLink>
+            <NuxtLink 
+              to="/painel/fila" 
+              class="w-full flex items-center gap-3 p-4 rounded-xl bg-lilac-50 text-lilac-700 hover:bg-lilac-100 transition-all"
+            >
               <Icon name="lucide:users" class="w-5 h-5" />
               <span class="font-medium">Abrir Fila Virtual</span>
-            </button>
+            </NuxtLink>
           </div>
         </div>
 

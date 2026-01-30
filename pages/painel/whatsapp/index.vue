@@ -9,15 +9,45 @@
       <div class="flex items-center gap-3">
         <span 
           class="px-4 py-2 rounded-xl text-sm font-medium"
-          :class="isConnected ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'"
+          :class="isConnected ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'"
         >
-          {{ isConnected ? '🟢 Conectado' : '🔴 Desconectado' }}
+          {{ isConnected ? '🟢 Conectado' : '🟡 Configuração Necessária' }}
         </span>
         <button 
           v-if="!isConnected"
-          class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium hover:from-emerald-600 hover:to-emerald-700 transition-all"
+          @click="connectWhatsApp"
+          :disabled="connecting"
+          class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium hover:from-emerald-600 hover:to-emerald-700 transition-all disabled:opacity-50"
         >
-          Conectar WhatsApp
+          {{ connecting ? 'Conectando...' : 'Configurar WhatsApp' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Setup Notice -->
+    <div v-if="!isConnected" class="p-4 rounded-2xl bg-amber-50 border border-amber-200">
+      <div class="flex items-start gap-3">
+        <Icon name="lucide:info" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <div>
+          <h3 class="font-medium text-amber-800">Configuração do WhatsApp Bot</h3>
+          <p class="text-sm text-amber-700 mt-1">
+            Para ativar as automações de WhatsApp, é necessário configurar a integração com a API do WhatsApp Business.
+            Entre em contato com o suporte para ativar esta funcionalidade.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div v-if="showQRCode" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showQRCode = false">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Escaneie o QR Code</h3>
+        <div class="w-48 h-48 bg-gray-100 rounded-xl mx-auto mb-4 flex items-center justify-center">
+          <Icon name="lucide:qr-code" class="w-24 h-24 text-gray-400" />
+        </div>
+        <p class="text-sm text-gray-500 mb-4">Esta funcionalidade requer configuração adicional da API do WhatsApp.</p>
+        <button @click="showQRCode = false" class="px-6 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-medium">
+          Fechar
         </button>
       </div>
     </div>
@@ -76,7 +106,8 @@
               'w-14 h-8 rounded-full transition-all',
               automation.active ? 'bg-emerald-500' : 'bg-gray-200'
             ]"
-            @click="automation.active = !automation.active"
+            :disabled="!isConnected"
+            @click="toggleAutomation(automation)"
           >
             <div 
               :class="[
@@ -122,7 +153,30 @@ definePageMeta({
   layout: 'painel'
 })
 
-const isConnected = ref(true)
+const { authHeaders } = useAuth()
+const currentSalon = inject('currentSalon') as Ref<any>
+
+const isConnected = ref(false)
+const connecting = ref(false)
+const showQRCode = ref(false)
+
+// Connect WhatsApp (placeholder - requires Evolution API or similar)
+const connectWhatsApp = async () => {
+  connecting.value = true
+  
+  // Simulate connection attempt
+  setTimeout(() => {
+    showQRCode.value = true
+    connecting.value = false
+  }, 1500)
+}
+
+// Toggle automation
+const toggleAutomation = (automation: any) => {
+  automation.active = !automation.active
+  // In production, this would save to backend
+  console.log(`Automation ${automation.name} is now ${automation.active ? 'active' : 'inactive'}`)
+}
 
 const automations = ref([
   {

@@ -244,24 +244,98 @@
 
           <div class="flex items-center gap-3">
             <!-- Quick Actions -->
-            <button 
+            <NuxtLink 
               v-if="currentSalon"
+              to="/painel/agendamentos"
               class="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold text-sm hover:from-lilac-600 hover:to-rose-600 transition-all shadow-glow"
             >
               <Icon name="lucide:plus" class="w-4 h-4" />
               Novo Agendamento
-            </button>
+            </NuxtLink>
 
             <!-- Notifications -->
-            <button class="relative p-2.5 rounded-xl bg-white border border-lilac-100 hover:border-lilac-200 hover:bg-lilac-50 transition-all shadow-soft">
+            <button 
+              @click="showNotifications = !showNotifications"
+              class="relative p-2.5 rounded-xl bg-white border border-lilac-100 hover:border-lilac-200 hover:bg-lilac-50 transition-all shadow-soft"
+            >
               <Icon name="lucide:bell" class="w-5 h-5 text-gray-500" />
-              <span class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center">3</span>
+              <span v-if="notificationCount > 0" class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center">{{ notificationCount }}</span>
             </button>
 
+            <!-- Notifications Dropdown -->
+            <div 
+              v-if="showNotifications" 
+              class="absolute top-16 right-6 w-80 bg-white rounded-2xl border border-lilac-100 shadow-xl z-50 overflow-hidden"
+            >
+              <div class="p-4 border-b border-lilac-100">
+                <h3 class="font-semibold text-gray-800">Notificações</h3>
+              </div>
+              <div class="max-h-80 overflow-y-auto">
+                <div v-if="notifications.length === 0" class="p-6 text-center text-gray-500">
+                  <Icon name="lucide:bell-off" class="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                  <p class="text-sm">Nenhuma notificação</p>
+                </div>
+                <div v-else>
+                  <div 
+                    v-for="notif in notifications" 
+                    :key="notif.id"
+                    class="p-4 border-b border-lilac-50 hover:bg-lilac-50/50 transition-colors cursor-pointer"
+                  >
+                    <p class="text-sm text-gray-800">{{ notif.message }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ notif.time }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Search -->
-            <button class="hidden md:flex p-2.5 rounded-xl bg-white border border-lilac-100 hover:border-lilac-200 hover:bg-lilac-50 transition-all shadow-soft">
+            <button 
+              @click="showSearch = !showSearch"
+              class="hidden md:flex p-2.5 rounded-xl bg-white border border-lilac-100 hover:border-lilac-200 hover:bg-lilac-50 transition-all shadow-soft"
+            >
               <Icon name="lucide:search" class="w-5 h-5 text-gray-500" />
             </button>
+
+            <!-- Search Modal -->
+            <div 
+              v-if="showSearch" 
+              class="absolute top-16 right-6 w-96 bg-white rounded-2xl border border-lilac-100 shadow-xl z-50 overflow-hidden"
+            >
+              <div class="p-4">
+                <div class="relative">
+                  <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input 
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="Buscar clientes, serviços, agendamentos..."
+                    class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 focus:border-lilac-300 outline-none"
+                    autofocus
+                  />
+                </div>
+                <div v-if="searchQuery" class="mt-3 space-y-2">
+                  <NuxtLink 
+                    :to="`/painel/clientes?search=${searchQuery}`"
+                    @click="showSearch = false"
+                    class="block p-3 rounded-lg hover:bg-lilac-50 transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <Icon name="lucide:users" class="w-5 h-5 text-lilac-500" />
+                      <span class="text-sm text-gray-700">Buscar em Clientes</span>
+                    </div>
+                  </NuxtLink>
+                  <NuxtLink 
+                    :to="`/painel/agendamentos?search=${searchQuery}`"
+                    @click="showSearch = false"
+                    class="block p-3 rounded-lg hover:bg-lilac-50 transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <Icon name="lucide:calendar" class="w-5 h-5 text-lilac-500" />
+                      <span class="text-sm text-gray-700">Buscar em Agendamentos</span>
+                    </div>
+                  </NuxtLink>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -312,6 +386,9 @@ const { user, isAuthenticated, isManager, init, logout, authHeaders } = useAuth(
 const sidebarOpen = ref(false)
 const showSalonSelector = ref(false)
 const showCreateSalon = ref(false)
+const showNotifications = ref(false)
+const showSearch = ref(false)
+const searchQuery = ref('')
 const loadingSalons = ref(true)
 const userSalons = ref<any[]>([])
 const currentSalon = ref<any>(null)
@@ -320,6 +397,21 @@ const createError = ref('')
 const newSalon = ref({
   name: '',
   slug: ''
+})
+
+// Notifications
+const notifications = ref<any[]>([])
+const notificationCount = computed(() => notifications.value.length)
+
+// Close dropdowns when clicking outside
+const closeDropdowns = () => {
+  showNotifications.value = false
+  showSearch.value = false
+}
+
+// Close dropdowns on route change
+watch(() => route.path, () => {
+  closeDropdowns()
 })
 
 // Initialize auth

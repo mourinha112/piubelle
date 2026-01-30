@@ -80,7 +80,10 @@
                   />
                   <Icon v-else name="lucide:camera" class="w-8 h-8 text-lilac-500" />
                 </div>
-                <button class="px-4 py-2 rounded-xl bg-lilac-50 text-lilac-600 font-medium hover:bg-lilac-100 transition-all">
+                <button 
+                  @click="showPhotoModal = true"
+                  class="px-4 py-2 rounded-xl bg-lilac-50 text-lilac-600 font-medium hover:bg-lilac-100 transition-all"
+                >
                   Alterar foto
                 </button>
               </div>
@@ -269,6 +272,72 @@
         </div>
       </div>
     </template>
+
+    <!-- Photo Modal -->
+    <div 
+      v-if="showPhotoModal" 
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      @click.self="showPhotoModal = false"
+    >
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+          <h3 class="text-xl font-display font-semibold text-gray-800">Alterar Foto de Perfil</h3>
+          <button @click="showPhotoModal = false" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <Icon name="lucide:x" class="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+        
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">URL da Imagem</label>
+            <input 
+              v-model="newAvatarUrl"
+              type="url"
+              placeholder="https://exemplo.com/sua-foto.jpg"
+              class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
+            />
+            <p class="text-xs text-gray-400 mt-2">
+              Cole a URL de uma imagem hospedada na internet (ex: Imgur, Google Drive público, etc.)
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-lilac-50 border border-lilac-100">
+            <div class="flex items-start gap-3">
+              <Icon name="lucide:info" class="w-5 h-5 text-lilac-600 flex-shrink-0 mt-0.5" />
+              <p class="text-sm text-lilac-700">
+                <strong>Dica:</strong> Você pode usar serviços gratuitos como Imgur ou PostImages para hospedar sua imagem e obter o link direto.
+              </p>
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div v-if="newAvatarUrl" class="text-center">
+            <p class="text-sm text-gray-500 mb-2">Pré-visualização:</p>
+            <img 
+              :src="newAvatarUrl" 
+              class="w-20 h-20 rounded-2xl mx-auto object-cover border-2 border-lilac-200"
+              @error="newAvatarUrl = ''"
+            />
+          </div>
+        </div>
+        
+        <div class="p-6 border-t border-gray-100 flex gap-3 justify-end">
+          <button 
+            @click="showPhotoModal = false"
+            class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all"
+          >
+            Cancelar
+          </button>
+          <button 
+            @click="savePhoto"
+            :disabled="!newAvatarUrl"
+            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 transition-all disabled:opacity-50"
+          >
+            Salvar Foto
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -284,6 +353,8 @@ const loading = ref(true)
 const copied = ref(false)
 const saving = ref(false)
 const saved = ref(false)
+const showPhotoModal = ref(false)
+const newAvatarUrl = ref('')
 
 const stats = ref({
   views: 0,
@@ -400,6 +471,15 @@ const copyLink = async () => {
     setTimeout(() => { copied.value = false }, 2000)
   } catch (error) {
     console.error('Erro ao copiar:', error)
+  }
+}
+
+const savePhoto = () => {
+  if (newAvatarUrl.value) {
+    linkBio.value.avatarUrl = newAvatarUrl.value
+    showPhotoModal.value = false
+    newAvatarUrl.value = ''
+    saveLinkBio()
   }
 }
 
