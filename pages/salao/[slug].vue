@@ -2,11 +2,22 @@
   <div class="min-h-screen">
     <!-- Cover Image -->
     <div class="relative h-64 md:h-80">
-      <img 
-        :src="salon.coverImage" 
-        :alt="salon.name"
-        class="w-full h-full object-cover"
-      />
+      <template v-if="salon.coverImage">
+        <img 
+          :src="salon.coverImage" 
+          :alt="salon.name"
+          class="w-full h-full object-cover"
+        />
+      </template>
+      <div 
+        v-else 
+        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400"
+      >
+        <div class="text-center">
+          <Icon name="lucide:image-off" class="w-12 h-12 mx-auto mb-2 opacity-60" />
+          <span class="text-sm font-medium">Sem foto</span>
+        </div>
+      </div>
       <div class="absolute inset-0 bg-gradient-to-t from-rose-50 via-transparent to-transparent" />
       
       <!-- Back Button -->
@@ -40,8 +51,11 @@
       <!-- Header Card -->
       <div class="p-6 rounded-3xl bg-white border border-lilac-100 shadow-soft mb-6">
         <div class="flex items-start gap-4 mb-4">
-          <div class="w-20 h-20 rounded-2xl border-4 border-white shadow-soft overflow-hidden bg-white">
-            <img :src="salon.logo" :alt="salon.name" class="w-full h-full object-cover" />
+          <div class="w-20 h-20 rounded-2xl border-4 border-white shadow-soft overflow-hidden bg-white flex items-center justify-center">
+            <img v-if="salon.logo" :src="salon.logo" :alt="salon.name" class="w-full h-full object-cover" />
+            <div v-else class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs font-medium text-center leading-tight px-1">
+              Sem foto
+            </div>
           </div>
           <div class="flex-1">
             <h1 class="font-display text-2xl font-semibold text-gray-800">{{ salon.name }}</h1>

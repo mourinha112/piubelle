@@ -50,9 +50,28 @@ export default defineEventHandler(async (event) => {
           id: s.id,
           name: s.name,
           slug: s.slug,
+          logo_url: s.logo_url,
           logoUrl: s.logo_url,
+          cover_url: s.cover_url,
+          coverUrl: s.cover_url,
           phone: s.phone,
-          description: s.description
+          description: s.description,
+          email: s.email,
+          website: s.website,
+          instagram: s.instagram,
+          facebook: s.facebook,
+          address_street: s.address_street,
+          address_number: s.address_number,
+          address_complement: s.address_complement,
+          address_neighborhood: s.address_neighborhood,
+          address_city: s.address_city,
+          address_state: s.address_state,
+          address_zipcode: s.address_zipcode,
+          auto_confirm_booking: s.auto_confirm_booking,
+          booking_advance_days: s.booking_advance_days,
+          booking_cancel_hours: s.booking_cancel_hours,
+          require_deposit: s.require_deposit,
+          deposit_percentage: s.deposit_percentage
         }))
       }
     }

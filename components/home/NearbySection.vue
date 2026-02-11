@@ -35,12 +35,19 @@
           @click="navigateTo(`/salao/${salon.slug}`)"
         >
           <!-- Image -->
-          <div class="flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden">
+          <div class="flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
             <img 
-              :src="salon.logo || salon.coverImage || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=400&fit=crop'" 
+              v-if="salon.logo || salon.coverImage" 
+              :src="salon.logo || salon.coverImage" 
               :alt="salon.name" 
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
             />
+            <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+              <div class="text-center">
+                <Icon name="lucide:image-off" class="w-6 h-6 mx-auto opacity-60" />
+                <span class="text-[10px] font-medium leading-tight block mt-0.5">Sem foto</span>
+              </div>
+            </div>
           </div>
 
           <!-- Content -->

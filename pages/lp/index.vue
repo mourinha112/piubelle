@@ -122,7 +122,7 @@
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
           <div class="flex items-center gap-3">
             <img 
-              src="/logotipo.png" 
+              src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
               alt="PiuBelle" 
               class="h-10 w-auto object-contain"
             />

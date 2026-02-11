@@ -20,6 +20,103 @@
 
     <!-- Informações do Salão -->
     <div v-if="activeTab === 'general'" class="space-y-6">
+      <!-- Logo e imagens do salão -->
+      <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
+        <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Logo e imagens do salão</h2>
+        <p class="text-sm text-gray-500 mb-6">Essas imagens aparecem no marketplace, na página do salão e no Link na Bio.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Logo (foto de perfil) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Logo do salão (foto de perfil)</label>
+            <div class="flex flex-col sm:flex-row gap-4 items-start">
+              <div class="flex-shrink-0 w-24 h-24 rounded-2xl border-2 border-lilac-100 overflow-hidden bg-gray-50 flex items-center justify-center">
+                <img 
+                  v-if="settings.logoUrl" 
+                  :src="settings.logoUrl" 
+                  alt="Logo" 
+                  class="w-full h-full object-cover"
+                />
+                <div v-else class="text-center text-gray-400 text-xs p-2">
+                  <Icon name="lucide:image" class="w-8 h-8 mx-auto mb-1 opacity-60" />
+                  Sem foto
+                </div>
+              </div>
+              <div class="flex-1 min-w-0 space-y-2">
+                <input
+                  v-model="settings.logoUrl"
+                  type="url"
+                  class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all text-sm"
+                  placeholder="https://exemplo.com/logo.jpg"
+                />
+                <p class="text-xs text-gray-500">Cole a URL de uma imagem quadrada (recomendado: 200x200px)</p>
+                <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-lilac-50 text-lilac-700 text-sm font-medium cursor-pointer hover:bg-lilac-100 transition-colors">
+                  <Icon name="lucide:upload" class="w-4 h-4" />
+                  Escolher arquivo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    class="sr-only"
+                    @change="onLogoFileChange"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Foto de capa -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Foto de capa</label>
+            <div class="flex flex-col sm:flex-row gap-4 items-start">
+              <div class="flex-shrink-0 w-full sm:w-32 h-24 rounded-2xl border-2 border-lilac-100 overflow-hidden bg-gray-50 flex items-center justify-center">
+                <img 
+                  v-if="settings.coverUrl" 
+                  :src="settings.coverUrl" 
+                  alt="Capa" 
+                  class="w-full h-full object-cover"
+                />
+                <div v-else class="text-center text-gray-400 text-xs p-2">
+                  <Icon name="lucide:image" class="w-8 h-8 mx-auto mb-1 opacity-60" />
+                  Sem foto
+                </div>
+              </div>
+              <div class="flex-1 min-w-0 space-y-2">
+                <input
+                  v-model="settings.coverUrl"
+                  type="url"
+                  class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all text-sm"
+                  placeholder="https://exemplo.com/capa.jpg"
+                />
+                <p class="text-xs text-gray-500">URL da imagem de capa (recomendado: 800x400px)</p>
+                <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-lilac-50 text-lilac-700 text-sm font-medium cursor-pointer hover:bg-lilac-100 transition-colors">
+                  <Icon name="lucide:upload" class="w-4 h-4" />
+                  Escolher arquivo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    class="sr-only"
+                    @change="onCoverFileChange"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-6">
+          <button 
+            type="button"
+            @click="saveGeneral"
+            :disabled="saving"
+            class="px-6 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold hover:from-lilac-600 hover:to-rose-600 disabled:opacity-50 transition-all flex items-center gap-2 shadow-glow"
+          >
+            <Icon v-if="saving" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+            <Icon v-else name="lucide:save" class="w-5 h-5" />
+            Salvar imagens
+          </button>
+        </div>
+      </div>
+
       <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
         <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Informações do Salão</h2>
         
@@ -461,6 +558,8 @@ const tabs = [
 const settings = ref({
   name: 'Studio Belle Hair',
   slug: 'studio-belle-hair',
+  logoUrl: '' as string,
+  coverUrl: '' as string,
   description: 'Salão de beleza completo com profissionais especializados em corte, coloração, tratamentos capilares e muito mais.',
   phone: '(79) 3211-0000',
   whatsapp: '(79) 99999-9999',
@@ -481,6 +580,41 @@ const settings = ref({
   requireDeposit: false,
   depositPercentage: 20
 })
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+const onLogoFileChange = async (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file || !file.type.startsWith('image/')) return
+  try {
+    settings.value.logoUrl = await readFileAsDataUrl(file)
+  } catch (err) {
+    console.error(err)
+    alert('Erro ao ler a imagem.')
+  }
+  input.value = ''
+}
+
+const onCoverFileChange = async (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file || !file.type.startsWith('image/')) return
+  try {
+    settings.value.coverUrl = await readFileAsDataUrl(file)
+  } catch (err) {
+    console.error(err)
+    alert('Erro ao ler a imagem.')
+  }
+  input.value = ''
+}
 
 const workingHours = ref([
   { dayOfWeek: 0, label: 'Domingo', isOpen: false, openTime: '09:00', closeTime: '18:00', hasBreak: false, breakStart: '12:00', breakEnd: '13:00' },
@@ -551,6 +685,8 @@ const saveGeneral = async () => {
       body: {
         name: settings.value.name,
         slug: settings.value.slug,
+        logoUrl: settings.value.logoUrl || undefined,
+        coverUrl: settings.value.coverUrl || undefined,
         description: settings.value.description,
         phone: settings.value.phone,
         whatsapp: settings.value.whatsapp,
@@ -573,10 +709,14 @@ const saveGeneral = async () => {
       }
     })
     
-    // Update currentSalon with new name if changed
+    // Update currentSalon with new data
     if (currentSalon.value) {
       currentSalon.value.name = settings.value.name
       currentSalon.value.slug = settings.value.slug
+      currentSalon.value.logo_url = settings.value.logoUrl
+      currentSalon.value.logoUrl = settings.value.logoUrl
+      currentSalon.value.cover_url = settings.value.coverUrl
+      currentSalon.value.coverUrl = settings.value.coverUrl
     }
     
     saved.value = true
@@ -597,6 +737,8 @@ const loadSalonSettings = () => {
   settings.value = {
     name: s.name || '',
     slug: s.slug || '',
+    logoUrl: s.logo_url ?? s.logoUrl ?? '',
+    coverUrl: s.cover_url ?? s.coverUrl ?? '',
     description: s.description || '',
     phone: s.phone || '',
     whatsapp: s.whatsapp || '',

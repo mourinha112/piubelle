@@ -36,11 +36,22 @@
         >
           <!-- Image -->
           <div class="relative h-48 overflow-hidden">
-            <img 
-              :src="salon.coverImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800&h=600&fit=crop'" 
-              :alt="salon.name"
-              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
+            <template v-if="salon.coverImage">
+              <img 
+                :src="salon.coverImage" 
+                :alt="salon.name"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+            </template>
+            <div 
+              v-else 
+              class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400"
+            >
+              <div class="text-center">
+                <Icon name="lucide:image-off" class="w-10 h-10 mx-auto mb-1 opacity-60" />
+                <span class="text-xs font-medium">Sem foto</span>
+              </div>
+            </div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             
             <!-- Featured Badge -->
@@ -52,12 +63,16 @@
             </div>
 
             <!-- Logo -->
-            <div class="absolute -bottom-6 left-4 w-14 h-14 rounded-2xl border-4 border-white overflow-hidden shadow-soft bg-white">
+            <div class="absolute -bottom-6 left-4 w-14 h-14 rounded-2xl border-4 border-white overflow-hidden shadow-soft bg-white flex items-center justify-center">
               <img 
-                :src="salon.logo || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=200&h=200&fit=crop'" 
+                v-if="salon.logo" 
+                :src="salon.logo" 
                 :alt="salon.name" 
                 class="w-full h-full object-cover" 
               />
+              <div v-else class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-[10px] font-medium text-center leading-tight px-0.5">
+                Sem foto
+              </div>
             </div>
           </div>
 

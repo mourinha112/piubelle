@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="text-center mb-8">
         <img 
-          src="/logotipo.png" 
+          src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
           alt="PiuBelle" 
           class="h-20 w-auto object-contain mx-auto mb-4"
         />

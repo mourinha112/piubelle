@@ -5,7 +5,7 @@
       <div class="p-8">
         <div class="text-center mb-8">
           <img 
-            src="/logotipo.png" 
+            src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
             alt="PiuBelle" 
             class="h-20 w-auto object-contain mx-auto mb-4"
           />
@@ -64,7 +64,7 @@
       <div class="p-6 border-b border-lilac-100/50">
         <NuxtLink to="/painel" class="flex items-center gap-3 group">
           <img 
-            src="/logotipo.png" 
+            src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
             alt="PiuBelle" 
             class="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
           />
@@ -345,7 +345,7 @@
         <!-- Mostrar aviso se não tiver salão -->
         <div v-if="!currentSalon && !loadingSalons" class="flex flex-col items-center justify-center min-h-[60vh]">
           <img 
-            src="/logotipo.png" 
+            src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
             alt="PiuBelle" 
             class="h-24 w-auto object-contain mb-6"
           />
