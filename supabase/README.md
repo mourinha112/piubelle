@@ -49,7 +49,18 @@ SET owner_id = 'COLE-O-UUID-AQUI'
 WHERE slug = 'studio-belle-hair-mockup';
 ```
 
-### 5. Reiniciar o Servidor
+### 5. Bucket para imagens do salão (logo e capa)
+Para que o upload de logo e capa funcione em **Configurações**:
+
+1. No painel do Supabase, vá em **Storage**
+2. Clique em **New bucket**
+3. Nome: `salon-images`
+4. Marque **Public bucket** (para as URLs das imagens funcionarem)
+5. Clique em **Create bucket**
+
+Se o bucket não existir, o sistema pede para usar uma **URL de imagem** em vez de enviar arquivo.
+
+### 6. Reiniciar o Servidor
 ```bash
 # Pare o servidor (Ctrl+C)
 # E inicie novamente:

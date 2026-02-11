@@ -49,14 +49,16 @@
                   class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all text-sm"
                   placeholder="https://exemplo.com/logo.jpg"
                 />
-                <p class="text-xs text-gray-500">Cole a URL de uma imagem quadrada (recomendado: 200x200px)</p>
-                <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-lilac-50 text-lilac-700 text-sm font-medium cursor-pointer hover:bg-lilac-100 transition-colors">
-                  <Icon name="lucide:upload" class="w-4 h-4" />
-                  Escolher arquivo
+                <p class="text-xs text-gray-500">Cole a URL ou envie uma imagem (máx. 3 MB). Quadrada, ex.: 200×200px.</p>
+                <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-lilac-50 text-lilac-700 text-sm font-medium cursor-pointer hover:bg-lilac-100 transition-colors disabled:opacity-50">
+                  <Icon v-if="uploadingLogo" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+                  <Icon v-else name="lucide:upload" class="w-4 h-4" />
+                  {{ uploadingLogo ? 'Enviando...' : 'Escolher arquivo' }}
                   <input
                     type="file"
                     accept="image/*"
                     class="sr-only"
+                    :disabled="uploadingLogo"
                     @change="onLogoFileChange"
                   />
                 </label>
@@ -87,14 +89,16 @@
                   class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all text-sm"
                   placeholder="https://exemplo.com/capa.jpg"
                 />
-                <p class="text-xs text-gray-500">URL da imagem de capa (recomendado: 800x400px)</p>
-                <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-lilac-50 text-lilac-700 text-sm font-medium cursor-pointer hover:bg-lilac-100 transition-colors">
-                  <Icon name="lucide:upload" class="w-4 h-4" />
-                  Escolher arquivo
+                <p class="text-xs text-gray-500">URL ou envie uma imagem (máx. 3 MB). Ex.: 800×400px.</p>
+                <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-lilac-50 text-lilac-700 text-sm font-medium cursor-pointer hover:bg-lilac-100 transition-colors disabled:opacity-50">
+                  <Icon v-if="uploadingCover" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+                  <Icon v-else name="lucide:upload" class="w-4 h-4" />
+                  {{ uploadingCover ? 'Enviando...' : 'Escolher arquivo' }}
                   <input
                     type="file"
                     accept="image/*"
                     class="sr-only"
+                    :disabled="uploadingCover"
                     @change="onCoverFileChange"
                   />
                 </label>
@@ -581,39 +585,64 @@ const settings = ref({
   depositPercentage: 20
 })
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = reject
-    reader.readAsDataURL(file)
+const uploadingLogo = ref(false)
+const uploadingCover = ref(false)
+
+const uploadImage = async (file: File): Promise<string | null> => {
+  const form = new FormData()
+  form.append('file', file)
+  const res = await $fetch<{ success?: boolean; url?: string }>('/api/painel/salon/upload-image', {
+    method: 'POST',
+    headers: authHeaders.value,
+    body: form
   })
+  return res?.url ?? null
 }
 
 const onLogoFileChange = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file || !file.type.startsWith('image/')) return
-  try {
-    settings.value.logoUrl = await readFileAsDataUrl(file)
-  } catch (err) {
-    console.error(err)
-    alert('Erro ao ler a imagem.')
+  if (file.size > 3 * 1024 * 1024) {
+    alert('Imagem muito grande. Use até 3 MB ou cole uma URL.')
+    input.value = ''
+    return
   }
-  input.value = ''
+  uploadingLogo.value = true
+  try {
+    const url = await uploadImage(file)
+    if (url) settings.value.logoUrl = url
+    else alert('Não foi possível enviar a imagem. Tente usar uma URL.')
+  } catch (err: any) {
+    console.error(err)
+    alert(err?.data?.message || err?.message || 'Erro ao enviar imagem. Tente usar uma URL.')
+  } finally {
+    uploadingLogo.value = false
+    input.value = ''
+  }
 }
 
 const onCoverFileChange = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file || !file.type.startsWith('image/')) return
-  try {
-    settings.value.coverUrl = await readFileAsDataUrl(file)
-  } catch (err) {
-    console.error(err)
-    alert('Erro ao ler a imagem.')
+  if (file.size > 3 * 1024 * 1024) {
+    alert('Imagem muito grande. Use até 3 MB ou cole uma URL.')
+    input.value = ''
+    return
   }
-  input.value = ''
+  uploadingCover.value = true
+  try {
+    const url = await uploadImage(file)
+    if (url) settings.value.coverUrl = url
+    else alert('Não foi possível enviar a imagem. Tente usar uma URL.')
+  } catch (err: any) {
+    console.error(err)
+    alert(err?.data?.message || err?.message || 'Erro ao enviar imagem. Tente usar uma URL.')
+  } finally {
+    uploadingCover.value = false
+    input.value = ''
+  }
 }
 
 const workingHours = ref([
