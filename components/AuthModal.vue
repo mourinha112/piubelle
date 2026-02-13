@@ -3,8 +3,8 @@
     <div class="p-8">
       <!-- Header -->
       <div class="text-center mb-8">
-        <img 
-          src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
+          <img 
+            src="/logotipo.png" 
           alt="PiuBelle" 
           class="h-20 w-auto object-contain mx-auto mb-4"
         />

@@ -7,7 +7,7 @@
         <div class="text-center mb-10">
           <NuxtLink to="/" class="inline-block group">
             <img 
-              src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
+              src="/logotipo.png" 
               alt="PiuBelle" 
               class="h-16 w-auto object-contain mx-auto group-hover:scale-105 transition-transform"
             />

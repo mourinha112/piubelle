@@ -205,6 +205,17 @@
             </div>
           </div>
 
+          <div class="mt-3">
+            <label class="block text-sm font-medium text-gray-700 mb-2">CPF / CNPJ</label>
+            <input
+              v-model="settings.document"
+              type="text"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
+              placeholder="Somente números, ex.: 12345678909"
+            />
+            <p class="text-xs text-gray-400 mt-1">Informe CPF ou CNPJ para geração de cobranças PIX via Asaas.</p>
+          </div>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
@@ -571,6 +582,7 @@ const settings = ref({
   website: 'https://studiobelle.com',
   instagram: '@studiobellehair',
   facebook: 'studiobellehair',
+  document: '' as string,
   addressStreet: 'Av. Beira Mar',
   addressNumber: '1500',
   addressComplement: 'Sala 101',
@@ -701,6 +713,16 @@ const states = [
   { value: 'TO', label: 'Tocantins' }
 ]
 
+// Só envia URL no PUT se for link normal (nunca base64) para evitar 413
+function safeImageUrl(url: string | undefined): string | undefined {
+  if (!url || typeof url !== 'string') return undefined
+  const trimmed = url.trim()
+  if (trimmed.startsWith('data:')) return undefined
+  if (trimmed.length > 2000) return undefined
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+  return undefined
+}
+
 const saveGeneral = async () => {
   if (!currentSalon.value?.id) return
   
@@ -708,14 +730,9 @@ const saveGeneral = async () => {
   saved.value = false
   
   try {
-    await $fetch(`/api/painel/salon/${currentSalon.value.id}`, {
-      method: 'PUT',
-      headers: authHeaders.value,
-      body: {
+    const body: Record<string, unknown> = {
         name: settings.value.name,
         slug: settings.value.slug,
-        logoUrl: settings.value.logoUrl || undefined,
-        coverUrl: settings.value.coverUrl || undefined,
         description: settings.value.description,
         phone: settings.value.phone,
         whatsapp: settings.value.whatsapp,
@@ -735,7 +752,24 @@ const saveGeneral = async () => {
         bookingCancelHours: settings.value.bookingCancelHours,
         requireDeposit: settings.value.requireDeposit,
         depositPercentage: settings.value.depositPercentage
-      }
+    }
+    const logo = safeImageUrl(settings.value.logoUrl)
+    const cover = safeImageUrl(settings.value.coverUrl)
+    if (logo !== undefined) body.logoUrl = logo
+    if (cover !== undefined) body.coverUrl = cover
+    // include metadata (CPF/CNPJ) if provided
+    const metadata: Record<string, any> = { ...(currentSalon.value?.metadata || {}) }
+    if (settings.value.document && String(settings.value.document).trim() !== '') {
+      metadata.document = String(settings.value.document).trim()
+    }
+    if (Object.keys(metadata).length > 0) {
+      body.metadata = metadata
+    }
+
+    await $fetch(`/api/painel/salon/${currentSalon.value.id}`, {
+      method: 'PUT',
+      headers: authHeaders.value,
+      body
     })
     
     // Update currentSalon with new data
@@ -746,6 +780,8 @@ const saveGeneral = async () => {
       currentSalon.value.logoUrl = settings.value.logoUrl
       currentSalon.value.cover_url = settings.value.coverUrl
       currentSalon.value.coverUrl = settings.value.coverUrl
+      // persist metadata locally for immediate use (e.g., payments)
+      currentSalon.value.metadata = { ...(currentSalon.value.metadata || {}), ...(body.metadata || {}) }
     }
     
     saved.value = true
@@ -763,11 +799,14 @@ const loadSalonSettings = () => {
   if (!currentSalon.value) return
   
   const s = currentSalon.value
-  settings.value = {
+  // Não carregar base64 no formulário (evita 413 e memória)
+    const logoFromSalon = s.logo_url ?? s.logoUrl ?? ''
+    const coverFromSalon = s.cover_url ?? s.coverUrl ?? ''
+    settings.value = {
     name: s.name || '',
     slug: s.slug || '',
-    logoUrl: s.logo_url ?? s.logoUrl ?? '',
-    coverUrl: s.cover_url ?? s.coverUrl ?? '',
+    logoUrl: safeImageUrl(logoFromSalon) || '',
+    coverUrl: safeImageUrl(coverFromSalon) || '',
     description: s.description || '',
     phone: s.phone || '',
     whatsapp: s.whatsapp || '',
@@ -775,6 +814,7 @@ const loadSalonSettings = () => {
     website: s.website || '',
     instagram: s.instagram || '',
     facebook: s.facebook || '',
+  document: s.metadata?.document || s.metadata?.cpf || s.metadata?.cnpj || s.cpf || s.cnpj || '',
     addressStreet: s.address_street || s.addressStreet || '',
     addressNumber: s.address_number || s.addressNumber || '',
     addressComplement: s.address_complement || s.addressComplement || '',

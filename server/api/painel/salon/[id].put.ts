@@ -54,6 +54,8 @@ export default defineEventHandler(async (event) => {
       if (body.requireDeposit !== undefined) updateData.require_deposit = body.requireDeposit
       if (body.depositPercentage !== undefined) updateData.deposit_percentage = body.depositPercentage
       if (body.isActive !== undefined) updateData.is_active = body.isActive
+      // Metadata (free-form JSON) - e.g., { document: '123...' }
+      if (body.metadata !== undefined) updateData.metadata = body.metadata
 
       const { data, error } = await supabaseAdmin
         .from('salons')
@@ -87,6 +89,7 @@ export default defineEventHandler(async (event) => {
           facebook: data.facebook,
           logoUrl: data.logo_url,
           coverUrl: data.cover_url,
+          metadata: data.metadata,
           addressStreet: data.address_street,
           addressNumber: data.address_number,
           addressComplement: data.address_complement,

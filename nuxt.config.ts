@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     // Variáveis privadas (server-side only)
     supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
     jwtSecret: process.env.JWT_SECRET || 'piubelle-secret-key-2026',
+    asaasApiKey: process.env.ASAAS_API_KEY || '',
     public: {
       // Variáveis públicas (client-side)
       supabaseUrl: process.env.SUPABASE_URL || '',

@@ -137,6 +137,30 @@
           </div>
         </div>
 
+        <!-- Subscription / Plan Card -->
+        <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
+          <h2 class="font-display text-xl font-semibold text-gray-800 mb-4">Plano Atual</h2>
+          <div v-if="subLoading" class="text-sm text-gray-500">Carregando informações do plano...</div>
+          <div v-else>
+            <div v-if="subscription">
+              <p class="font-medium text-gray-800">{{ subscription.plan?.name || 'Plano desconhecido' }}</p>
+              <p class="text-sm text-gray-500 mt-1">Status: <span class="font-semibold text-gray-700">{{ subscription.status }}</span></p>
+              <p v-if="subscription.trial_end" class="text-sm text-gray-500 mt-1">Trial até: {{ formatDate(subscription.trial_end) }}</p>
+              <p v-if="subscription.current_period_end" class="text-sm text-gray-500 mt-1">Próximo vencimento: {{ formatDate(subscription.current_period_end) }}</p>
+              <div class="mt-4 flex gap-2">
+              <NuxtLink :to="`/painel/plans?salonId=${currentSalon?.value?.id}`" class="px-4 py-2 rounded-xl bg-lilac-50 text-lilac-700">Gerenciar plano</NuxtLink>
+                <NuxtLink to="/painel/checkout" class="px-4 py-2 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white">Assinar / Renovar</NuxtLink>
+              </div>
+            </div>
+            <div v-else class="text-sm text-gray-500">
+              Nenhum plano encontrado. Escolha um plano para liberar o painel.
+              <div class="mt-3">
+                <NuxtLink :to="`/painel/plans?salonId=${currentSalon?.value?.id}`" class="px-4 py-2 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white">Escolher plano</NuxtLink>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Recent Activity -->
         <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
           <h2 class="font-display text-xl font-semibold text-gray-800 mb-4">Atividade Recente</h2>
@@ -294,6 +318,45 @@ const todayAppointments = computed(() => {
   // Otherwise return empty
   return []
 })
+
+// Subscription info (plano atual do salão)
+const subscription = ref<any>(null)
+const subLoading = ref(false)
+
+const loadSubscription = async () => {
+  if (!currentSalon.value?.id) {
+    subscription.value = null
+    return
+  }
+  subLoading.value = true
+  try {
+    const res = await $fetch(`/api/painel/subscription?salonId=${currentSalon.value.id}`, {
+      headers: authHeaders.value
+    })
+    subscription.value = res?.data ?? null
+  } catch (err) {
+    console.error('Erro ao carregar subscription:', err)
+    subscription.value = null
+  } finally {
+    subLoading.value = false
+  }
+}
+
+watch(() => currentSalon.value?.id, () => {
+  loadSubscription()
+})
+onMounted(() => {
+  loadSubscription()
+})
+
+const formatDate = (iso?: string) => {
+  if (!iso) return ''
+  try {
+    return new Date(iso).toLocaleDateString()
+  } catch {
+    return iso
+  }
+}
 
 // Atividades vazias (para salões novos)
 const emptyActivity: any[] = []

@@ -5,7 +5,7 @@
       <div class="p-8">
         <div class="text-center mb-8">
           <img 
-            src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
+            src="/logotipo.png" 
             alt="PiuBelle" 
             class="h-20 w-auto object-contain mx-auto mb-4"
           />
@@ -64,7 +64,7 @@
       <div class="p-6 border-b border-lilac-100/50">
         <NuxtLink to="/painel" class="flex items-center gap-3 group">
           <img 
-            src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
+            src="/logotipo.png" 
             alt="PiuBelle" 
             class="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
           />
@@ -449,6 +449,18 @@ const fetchUserSalons = async () => {
       // Selecionar primeiro salão automaticamente
       if (userSalons.value.length > 0) {
         currentSalon.value = userSalons.value[0]
+        // If subscription not present, redirect to plans for this salon
+        try {
+          const subRes = await useFetch(`/api/painel/subscription?salonId=${currentSalon.value.id}`)
+          if (subRes?.data?.value?.data == null) {
+            // avoid redirect loop if already on plans
+            if (!window.location.pathname.startsWith('/painel/plans')) {
+              navigateTo(`/painel/plans?salonId=${currentSalon.value.id}`)
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
       }
     }
   } catch (error) {
@@ -485,8 +497,10 @@ const createSalon = async () => {
       // Adicionar à lista e selecionar
       userSalons.value.unshift(data.value.data)
       currentSalon.value = data.value.data
-      showCreateSalon.value = false
       newSalon.value = { name: '', slug: '' }
+      // Redirect to plans selection for the newly created salon
+      navigateTo(`/painel/plans?salonId=${data.value.data.id}`)
+      return
     }
   } catch (error: any) {
     createError.value = error.message || 'Erro ao criar salão'
@@ -572,6 +586,7 @@ const managementNavItems = [
 ]
 
 const systemNavItems = [
+  { path: '/painel/plans', icon: 'lucide:crown', label: 'Planos' },
   { path: '/painel/whatsapp', icon: 'mdi:whatsapp', label: 'WhatsApp Bot' },
   { path: '/painel/link-bio', icon: 'lucide:link', label: 'Link Bio' },
   { path: '/painel/configuracoes', icon: 'lucide:settings', label: 'Configurações' }
@@ -596,6 +611,8 @@ const pageTitle = computed(() => {
     '/painel/financeiro': 'Financeiro',
     '/painel/fidelidade': 'Programa de Fidelidade',
     '/painel/avaliacoes': 'Avaliações',
+    '/painel/plans': 'Planos',
+    '/painel/checkout': 'Checkout',
     '/painel/whatsapp': 'WhatsApp Bot',
     '/painel/link-bio': 'Link Bio',
     '/painel/configuracoes': 'Configurações'

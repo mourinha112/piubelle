@@ -6,7 +6,7 @@
         <NuxtLink to="/" class="flex items-center gap-3 group">
           <div class="relative">
             <img 
-              src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
+              src="/logotipo.png" 
               alt="PiuBelle" 
               class="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
             />

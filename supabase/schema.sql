@@ -71,6 +71,52 @@ CREATE TABLE IF NOT EXISTS public.salons (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- =====================================================
+-- PLANS / SUBSCRIPTIONS / ADDONS (Billing)
+-- =====================================================
+
+-- Plans table: defines available subscription plans
+CREATE TABLE IF NOT EXISTS public.plans (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  key TEXT UNIQUE NOT NULL, -- eg: 'profissional', 'pro'
+  name TEXT NOT NULL,
+  price_cents INTEGER NOT NULL, -- price in cents (e.g. 9990)
+  currency TEXT NOT NULL DEFAULT 'BRL',
+  billing_interval TEXT NOT NULL DEFAULT 'monthly', -- monthly, yearly
+  max_employees INTEGER, -- maximum number of employees included
+  features JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Subscriptions table: maps a salon to an active subscription
+CREATE TABLE IF NOT EXISTS public.subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  salon_id UUID REFERENCES public.salons(id) ON DELETE CASCADE,
+  plan_id UUID REFERENCES public.plans(id) ON DELETE SET NULL,
+  provider_subscription_id TEXT, -- external provider id (Asaas)
+  status TEXT NOT NULL DEFAULT 'active', -- active, past_due, cancelled, trialing
+  current_period_start TIMESTAMPTZ,
+  current_period_end TIMESTAMPTZ,
+  trial_end TIMESTAMPTZ,
+  extra_employees INTEGER DEFAULT 0, -- count of additional employees purchased
+  metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Plan addons: pricing for extras like additional employees
+CREATE TABLE IF NOT EXISTS public.plan_addons (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  plan_id UUID REFERENCES public.plans(id) ON DELETE CASCADE,
+  addon_key TEXT NOT NULL, -- ex: 'extra_employee'
+  price_cents INTEGER NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+
 -- Horários de funcionamento
 CREATE TABLE IF NOT EXISTS public.salon_hours (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -501,6 +547,21 @@ INSERT INTO public.salon_hours (salon_id, day_of_week, open_time, close_time, is
 ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 4, '09:00', '19:00', false),
 ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 5, '09:00', '19:00', false),
 ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 6, '09:00', '17:00', false); -- Sábado
+
+-- =====================================================
+-- SEED: Plans & Addons
+-- =====================================================
+-- Plans (prices in cents)
+INSERT INTO public.plans (id, key, name, price_cents, currency, billing_interval, max_employees, features) VALUES
+  ('70000001-0001-0001-0001-000000000000', 'free', 'Gratuito', 0, 'BRL', 'monthly', 1, '{"description":"Plano Gratuito - recursos básicos"}'),
+  ('70000001-0001-0001-0001-000000000001', 'profissional', 'Profissional', 9990, 'BRL', 'monthly', 2, '{"description":"Plano Profissional - recursos básicos"}'),
+  ('70000001-0001-0001-0001-000000000002', 'pro', 'Pro', 19990, 'BRL', 'monthly', 5, '{"description":"Plano Pro - todas as funções"}');
+
+-- Add-on: extra employee
+INSERT INTO public.plan_addons (id, plan_id, addon_key, price_cents, description) VALUES
+  ('71000001-0001-0001-0001-000000000001', '70000001-0001-0001-0001-000000000001', 'extra_employee', 2990, 'Funcionário adicional por mês'),
+  ('71000001-0001-0001-0001-000000000002', '70000001-0001-0001-0001-000000000002', 'extra_employee', 2990, 'Funcionário adicional por mês');
+
 
 -- Categorias de Serviços
 INSERT INTO public.service_categories (id, salon_id, name, icon, color, sort_order) VALUES

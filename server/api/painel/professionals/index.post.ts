@@ -16,6 +16,37 @@ export default defineEventHandler(async (event) => {
     }
 
     if (isSupabaseConfigured()) {
+      // Verify subscription and plan limits
+      const { data: subs } = await supabaseAdmin
+        .from('subscriptions')
+        .select('*, plans(*)')
+        .eq('salon_id', salonId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      const subscription = subs?.[0] || null
+      if (!subscription) {
+        throw createError({ statusCode: 403, message: 'Sem plano ativo. Escolha um plano em /painel/plans para liberar funcionalidades.' })
+      }
+
+      const plan = subscription.plans || subscription.plan || null
+      const maxEmployees = (plan?.max_employees ?? 0) + (subscription.extra_employees ?? 0)
+
+      // Count active professionals
+      const { count: profCount } = await supabaseAdmin
+        .from('professionals')
+        .select('id', { count: 'exact', head: true })
+        .eq('salon_id', salonId)
+        .eq('is_active', true)
+
+      const currentCount = Number(profCount || 0)
+      if (currentCount >= maxEmployees) {
+        throw createError({
+          statusCode: 403,
+          message: `Limite de funcionários atingido para seu plano (limite: ${maxEmployees}). Faça upgrade ou compre add-on para liberar mais.` 
+        })
+      }
+
       const { data, error } = await supabaseAdmin
         .from('professionals')
         .insert({

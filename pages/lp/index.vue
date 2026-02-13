@@ -121,8 +121,8 @@
       <div class="container-app">
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
           <div class="flex items-center gap-3">
-            <img 
-              src="https://www.salonline.com.br/file/general/sl-transparent-logo.svg" 
+          <img 
+              src="/logotipo.png" 
               alt="PiuBelle" 
               class="h-10 w-auto object-contain"
             />
