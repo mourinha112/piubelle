@@ -4,9 +4,9 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-display font-semibold text-gray-800">Agendamentos</h1>
-        <p class="text-gray-500">Gerencie os agendamentos do seu salão</p>
+        <p class="text-gray-500">Gerencie os agendamentos do seu salao</p>
       </div>
-      <button 
+      <button
         @click="showNewModal = true"
         class="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 transition-all shadow-glow"
       >
@@ -19,23 +19,23 @@
     <div class="flex flex-wrap gap-3">
       <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-lilac-100 shadow-soft">
         <Icon name="lucide:calendar" class="w-5 h-5 text-gray-400" />
-        <input 
-          type="date" 
+        <input
+          type="date"
           v-model="selectedDate"
           class="bg-transparent text-gray-700 outline-none"
         />
       </div>
-      <select 
+      <select
         v-model="selectedStatus"
         class="px-4 py-2 rounded-xl bg-white border border-lilac-100 text-gray-700 shadow-soft outline-none"
       >
         <option value="">Todos os status</option>
         <option value="confirmed">Confirmados</option>
         <option value="pending">Pendentes</option>
-        <option value="completed">Concluídos</option>
+        <option value="completed">Concluidos</option>
         <option value="cancelled">Cancelados</option>
       </select>
-      <select 
+      <select
         v-model="selectedProfessional"
         class="px-4 py-2 rounded-xl bg-white border border-lilac-100 text-gray-700 shadow-soft outline-none"
       >
@@ -46,25 +46,34 @@
 
     <!-- View Toggle -->
     <div class="flex items-center gap-2 p-1.5 rounded-xl bg-lilac-50 w-fit">
-      <button 
+      <button
         :class="['px-4 py-2 rounded-lg font-medium transition-all', viewMode === 'list' ? 'bg-white text-lilac-600 shadow-soft' : 'text-gray-500']"
         @click="viewMode = 'list'"
       >
         <Icon name="lucide:list" class="w-4 h-4 inline mr-2" />
         Lista
       </button>
-      <button 
+      <button
         :class="['px-4 py-2 rounded-lg font-medium transition-all', viewMode === 'calendar' ? 'bg-white text-lilac-600 shadow-soft' : 'text-gray-500']"
         @click="viewMode = 'calendar'"
       >
         <Icon name="lucide:calendar" class="w-4 h-4 inline mr-2" />
-        Calendário
+        Calendario
       </button>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="text-center py-12">
-      <Icon name="lucide:loader-2" class="w-8 h-8 text-lilac-500 animate-spin mx-auto" />
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <div class="w-8 h-8 border-4 border-lilac-200 border-t-lilac-500 rounded-full animate-spin"></div>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="errorMsg" class="text-center py-12">
+      <Icon name="lucide:alert-circle" class="w-12 h-12 text-red-300 mx-auto mb-3" />
+      <p class="text-gray-500">{{ errorMsg }}</p>
+      <button @click="loadData" class="mt-4 px-5 py-2.5 rounded-xl bg-lilac-50 text-lilac-600 font-medium hover:bg-lilac-100 transition-all">
+        Tentar novamente
+      </button>
     </div>
 
     <!-- Appointments List -->
@@ -73,17 +82,17 @@
         <thead class="bg-gradient-to-r from-lilac-50 to-rose-50 border-b border-lilac-100">
           <tr>
             <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Cliente</th>
-            <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Serviço</th>
+            <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Servico</th>
             <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Profissional</th>
-            <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Horário</th>
+            <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Horario</th>
             <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Valor</th>
             <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Status</th>
-            <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Ações</th>
+            <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700">Acoes</th>
           </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="appointment in filteredAppointments" 
+          <tr
+            v-for="appointment in filteredAppointments"
             :key="appointment.id"
             class="border-b border-lilac-50 hover:bg-lilac-50/30 transition-colors"
           >
@@ -102,46 +111,47 @@
               <p class="text-gray-700">{{ appointment.serviceName }}</p>
               <p class="text-sm text-gray-400">{{ appointment.duration || 60 }} min</p>
             </td>
-            <td class="px-6 py-4 text-gray-700">{{ appointment.professionalName || 'Não definido' }}</td>
+            <td class="px-6 py-4 text-gray-700">{{ appointment.professionalName || 'Nao definido' }}</td>
             <td class="px-6 py-4">
               <p class="font-medium text-gray-800">{{ appointment.startTime }}</p>
               <p class="text-sm text-gray-400">{{ formatDate(appointment.date) }}</p>
             </td>
             <td class="px-6 py-4 font-medium text-gray-800">R$ {{ (appointment.total || 0).toFixed(2) }}</td>
             <td class="px-6 py-4">
-              <select 
+              <select
                 :value="appointment.status"
                 @change="updateStatus(appointment.id, ($event.target as HTMLSelectElement).value)"
-                class="px-3 py-1 rounded-full text-xs font-medium border-0 outline-none cursor-pointer"
+                :disabled="updatingStatus === appointment.id"
+                class="px-3 py-1 rounded-full text-xs font-medium border-0 outline-none cursor-pointer disabled:opacity-50"
                 :class="statusClasses[appointment.status]"
               >
                 <option value="pending">Pendente</option>
                 <option value="confirmed">Confirmado</option>
                 <option value="in_progress">Em andamento</option>
-                <option value="completed">Concluído</option>
+                <option value="completed">Concluido</option>
                 <option value="cancelled">Cancelado</option>
               </select>
             </td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-2">
-                <button 
+                <button
                   @click="viewAppointment(appointment)"
-                  class="p-2 rounded-lg hover:bg-lilac-50 transition-colors" 
+                  class="p-2 rounded-lg hover:bg-lilac-50 transition-colors"
                   title="Ver detalhes"
                 >
                   <Icon name="lucide:eye" class="w-4 h-4 text-gray-500" />
                 </button>
-                <button 
+                <button
                   @click="sendWhatsApp(appointment)"
-                  class="p-2 rounded-lg hover:bg-emerald-50 transition-colors" 
+                  class="p-2 rounded-lg hover:bg-emerald-50 transition-colors"
                   title="WhatsApp"
                 >
                   <Icon name="mdi:whatsapp" class="w-4 h-4 text-emerald-500" />
                 </button>
-                <button 
+                <button
                   v-if="appointment.status !== 'cancelled'"
                   @click="cancelAppointment(appointment)"
-                  class="p-2 rounded-lg hover:bg-red-50 transition-colors" 
+                  class="p-2 rounded-lg hover:bg-red-50 transition-colors"
                   title="Cancelar"
                 >
                   <Icon name="lucide:x" class="w-4 h-4 text-red-500" />
@@ -162,7 +172,7 @@
     <UModal v-model="showNewModal" :ui="{ width: 'max-w-xl' }">
       <div class="p-6">
         <h2 class="text-xl font-display font-semibold text-gray-800 mb-6">Novo Agendamento</h2>
-        
+
         <form @submit.prevent="createAppointment" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -176,11 +186,11 @@
                   <option value="">Selecione um cliente</option>
                   <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.name }}</option>
                 </select>
-                <button 
+                <button
                   type="button"
                   @click="showQuickClientModal = true"
                   class="px-3 py-2 rounded-xl bg-lilac-50 text-lilac-600 hover:bg-lilac-100 transition-colors"
-                  title="Cadastro rápido de cliente"
+                  title="Cadastro rapido de cliente"
                 >
                   <Icon name="lucide:user-plus" class="w-5 h-5" />
                 </button>
@@ -192,22 +202,22 @@
                 v-model="newAppointment.professionalId"
                 class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none"
               >
-                <option value="">Qualquer disponível</option>
+                <option value="">Qualquer disponivel</option>
                 <option v-for="pro in professionals" :key="pro.id" :value="pro.id">{{ pro.name }}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Serviço *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Servico *</label>
             <select
               v-model="newAppointment.serviceId"
               class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none"
               required
             >
-              <option value="">Selecione um serviço</option>
+              <option value="">Selecione um servico</option>
               <option v-for="service in services" :key="service.id" :value="service.id">
-                {{ service.name }} - R$ {{ service.price.toFixed(2) }} ({{ service.duration }}min)
+                {{ service.name }} - R$ {{ (service.price || 0).toFixed(2) }} ({{ service.duration }}min)
               </option>
             </select>
           </div>
@@ -223,7 +233,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Horário *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Horario *</label>
               <select
                 v-model="newAppointment.startTime"
                 class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none"
@@ -236,24 +246,24 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Observacoes</label>
             <textarea
               v-model="newAppointment.notes"
               rows="2"
               class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none resize-none"
-              placeholder="Observações sobre o agendamento..."
+              placeholder="Observacoes sobre o agendamento..."
             />
           </div>
 
           <div class="flex justify-end gap-3 pt-4">
-            <button 
+            <button
               type="button"
               @click="showNewModal = false"
               class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all"
             >
               Cancelar
             </button>
-            <button 
+            <button
               type="submit"
               :disabled="creating"
               class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 disabled:opacity-50 transition-all"
@@ -265,11 +275,11 @@
       </div>
     </UModal>
 
-    <!-- Modal Cadastro Rápido de Cliente -->
+    <!-- Modal Cadastro Rapido de Cliente -->
     <UModal v-model="showQuickClientModal" :ui="{ width: 'max-w-md' }">
       <div class="p-6">
-        <h2 class="text-xl font-display font-semibold text-gray-800 mb-6">Cadastro Rápido de Cliente</h2>
-        
+        <h2 class="text-xl font-display font-semibold text-gray-800 mb-6">Cadastro Rapido de Cliente</h2>
+
         <form @submit.prevent="createQuickClient" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
@@ -303,14 +313,14 @@
           </div>
 
           <div class="flex justify-end gap-3 pt-4">
-            <button 
+            <button
               type="button"
               @click="showQuickClientModal = false"
               class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all"
             >
               Cancelar
             </button>
-            <button 
+            <button
               type="submit"
               :disabled="creatingClient || !quickClientForm.name"
               class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 disabled:opacity-50 transition-all"
@@ -333,7 +343,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { authHeaders } = useAuth()
+const { api } = useApi()
 const currentSalon = inject('currentSalon') as Ref<any>
 
 const viewMode = ref('list')
@@ -341,12 +351,13 @@ const selectedDate = ref(new Date().toISOString().split('T')[0])
 const selectedStatus = ref('')
 const selectedProfessional = ref('')
 const loading = ref(false)
+const errorMsg = ref('')
 const showNewModal = ref(false)
 const showQuickClientModal = ref(false)
 const creating = ref(false)
 const creatingClient = ref(false)
+const updatingStatus = ref('')
 
-// New quick client form
 const quickClientForm = ref({
   name: '',
   phone: '',
@@ -381,14 +392,6 @@ const availableTimes = [
   '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00'
 ]
 
-const statusLabels: Record<string, string> = {
-  pending: 'Pendente',
-  confirmed: 'Confirmado',
-  in_progress: 'Em andamento',
-  completed: 'Concluído',
-  cancelled: 'Cancelado'
-}
-
 const statusClasses: Record<string, string> = {
   pending: 'bg-amber-50 text-amber-600',
   confirmed: 'bg-lilac-50 text-lilac-600',
@@ -412,7 +415,11 @@ const filteredAppointments = computed(() => {
 })
 
 const formatDate = (date: string) => {
-  return format(new Date(date), "d 'de' MMM", { locale: ptBR })
+  try {
+    return format(new Date(date), "d 'de' MMM", { locale: ptBR })
+  } catch {
+    return date
+  }
 }
 
 // Carregar dados
@@ -423,32 +430,22 @@ const loadData = async () => {
   }
 
   loading.value = true
+  errorMsg.value = ''
   try {
-    // Carregar agendamentos
-    const appointmentsRes = await $fetch(`/api/painel/appointments?salonId=${currentSalon.value.id}&date=${selectedDate.value}`, {
-      headers: authHeaders.value
-    })
-    appointments.value = (appointmentsRes as any).data || []
+    const [appointmentsRes, clientsRes, professionalsRes, servicesRes] = await Promise.all([
+      api<any>('/api/painel/appointments', { params: { salonId: currentSalon.value.id, date: selectedDate.value } }),
+      api<any>('/api/painel/clients', { params: { salonId: currentSalon.value.id } }),
+      api<any>('/api/painel/professionals', { params: { salonId: currentSalon.value.id } }),
+      api<any>('/api/painel/services', { params: { salonId: currentSalon.value.id } })
+    ])
 
-    // Carregar clientes
-    const clientsRes = await $fetch(`/api/painel/clients?salonId=${currentSalon.value.id}`, {
-      headers: authHeaders.value
-    })
-    clients.value = (clientsRes as any).data || []
-
-    // Carregar profissionais
-    const professionalsRes = await $fetch(`/api/painel/professionals?salonId=${currentSalon.value.id}`, {
-      headers: authHeaders.value
-    })
-    professionals.value = (professionalsRes as any).data || []
-
-    // Carregar serviços
-    const servicesRes = await $fetch(`/api/painel/services?salonId=${currentSalon.value.id}`, {
-      headers: authHeaders.value
-    })
-    services.value = (servicesRes as any).data || []
+    appointments.value = appointmentsRes.data?.data || []
+    clients.value = clientsRes.data?.data || []
+    professionals.value = professionalsRes.data?.data || []
+    services.value = servicesRes.data?.data || []
   } catch (error) {
     console.error('Erro ao carregar dados:', error)
+    errorMsg.value = 'Erro ao carregar agendamentos. Tente novamente.'
   } finally {
     loading.value = false
   }
@@ -463,10 +460,9 @@ const createAppointment = async () => {
   creating.value = true
   try {
     const selectedService = services.value.find(s => s.id === newAppointment.value.serviceId)
-    
-    await $fetch('/api/painel/appointments', {
+
+    const { error } = await api('/api/painel/appointments', {
       method: 'POST',
-      headers: authHeaders.value,
       body: {
         salonId: currentSalon.value.id,
         clientId: newAppointment.value.clientId,
@@ -478,6 +474,11 @@ const createAppointment = async () => {
         notes: newAppointment.value.notes
       }
     })
+
+    if (error) {
+      alert(error)
+      return
+    }
 
     showNewModal.value = false
     newAppointment.value = {
@@ -491,6 +492,7 @@ const createAppointment = async () => {
     await loadData()
   } catch (error) {
     console.error('Erro ao criar agendamento:', error)
+    alert('Erro ao criar agendamento')
   } finally {
     creating.value = false
   }
@@ -498,19 +500,26 @@ const createAppointment = async () => {
 
 // Atualizar status
 const updateStatus = async (appointmentId: string, status: string) => {
+  updatingStatus.value = appointmentId
   try {
-    await $fetch(`/api/painel/appointments/${appointmentId}`, {
+    const { error } = await api(`/api/painel/appointments/${appointmentId}`, {
       method: 'PUT',
-      headers: authHeaders.value,
       body: { status }
     })
-    
+
+    if (error) {
+      alert(error)
+      return
+    }
+
     const index = appointments.value.findIndex(a => a.id === appointmentId)
     if (index > -1) {
       appointments.value[index].status = status
     }
   } catch (error) {
     console.error('Erro ao atualizar status:', error)
+  } finally {
+    updatingStatus.value = ''
   }
 }
 
@@ -524,7 +533,7 @@ const viewAppointment = (appointment: any) => {
 const sendWhatsApp = (appointment: any) => {
   const phone = appointment.clientPhone?.replace(/\D/g, '')
   if (phone) {
-    const message = `Olá ${appointment.clientName}! Passando para confirmar seu agendamento no PiuBelle.`
+    const message = `Ola ${appointment.clientName}! Passando para confirmar seu agendamento no PiuBelle.`
     window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(message)}`, '_blank')
   }
 }
@@ -542,9 +551,8 @@ const createQuickClient = async () => {
 
   creatingClient.value = true
   try {
-    const res = await $fetch('/api/painel/clients', {
+    const { data, error } = await api<any>('/api/painel/clients', {
       method: 'POST',
-      headers: authHeaders.value,
       body: {
         salonId: currentSalon.value.id,
         name: quickClientForm.value.name,
@@ -553,15 +561,17 @@ const createQuickClient = async () => {
       }
     })
 
-    const newClient = (res as any).data
-    
-    // Add to clients list
-    clients.value.unshift(newClient)
-    
-    // Select the new client
-    newAppointment.value.clientId = newClient.id
-    
-    // Close modal and reset form
+    if (error) {
+      alert(error)
+      return
+    }
+
+    const newClient = data?.data
+    if (newClient) {
+      clients.value.unshift(newClient)
+      newAppointment.value.clientId = newClient.id
+    }
+
     showQuickClientModal.value = false
     quickClientForm.value = { name: '', phone: '', email: '' }
   } catch (error) {
@@ -577,12 +587,8 @@ watch(selectedDate, () => {
   loadData()
 })
 
-// Watch para recarregar quando o salão mudar
-watch(() => currentSalon.value?.id, () => {
-  loadData()
+// Watch para recarregar quando o salao mudar
+watch(() => currentSalon.value?.id, (newId) => {
+  if (newId) loadData()
 }, { immediate: true })
-
-onMounted(() => {
-  loadData()
-})
 </script>

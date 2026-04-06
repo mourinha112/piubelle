@@ -4,10 +4,10 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-display font-semibold text-gray-800">Link Bio</h1>
-        <p class="text-gray-500">Sua página personalizada para redes sociais</p>
+        <p class="text-gray-500">Sua pagina personalizada para redes sociais</p>
       </div>
       <div class="flex gap-3">
-        <NuxtLink 
+        <NuxtLink
           v-if="currentSalon?.slug"
           :to="`/lp/${currentSalon.slug}`"
           target="_blank"
@@ -16,14 +16,14 @@
           <Icon name="lucide:external-link" class="w-5 h-5" />
           Visualizar
         </NuxtLink>
-        <button 
+        <button
           @click="copyLink"
           class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-lilac-100 text-gray-600 hover:border-lilac-200 transition-all shadow-soft"
         >
           <Icon name="lucide:copy" class="w-5 h-5" />
           {{ copied ? 'Copiado!' : 'Copiar Link' }}
         </button>
-        <button 
+        <button
           @click="saveLinkBio"
           :disabled="saving"
           class="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 transition-all shadow-glow disabled:opacity-50"
@@ -43,7 +43,7 @@
     <!-- No Salon State -->
     <div v-else-if="!currentSalon" class="text-center py-12">
       <Icon name="lucide:store" class="w-12 h-12 text-lilac-300 mx-auto mb-3" />
-      <p class="text-gray-500">Crie um salão para configurar seu Link Bio</p>
+      <p class="text-gray-500">Crie um salao para configurar seu Link Bio</p>
     </div>
 
     <template v-else>
@@ -51,7 +51,7 @@
       <div class="grid grid-cols-3 gap-4">
         <div class="p-5 rounded-2xl bg-white border border-lilac-100 shadow-soft">
           <p class="text-3xl font-bold text-lilac-600">{{ stats.views }}</p>
-          <p class="text-sm text-gray-500">Visualizações</p>
+          <p class="text-sm text-gray-500">Visualizacoes</p>
         </div>
         <div class="p-5 rounded-2xl bg-white border border-lilac-100 shadow-soft">
           <p class="text-3xl font-bold text-rose-600">{{ stats.clicks }}</p>
@@ -59,7 +59,7 @@
         </div>
         <div class="p-5 rounded-2xl bg-white border border-lilac-100 shadow-soft">
           <p class="text-3xl font-bold text-emerald-600">{{ stats.conversionRate }}%</p>
-          <p class="text-sm text-gray-500">Taxa de conversão</p>
+          <p class="text-sm text-gray-500">Taxa de conversao</p>
         </div>
       </div>
 
@@ -69,18 +69,18 @@
           <!-- Profile -->
           <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
             <h2 class="font-display text-xl font-semibold text-gray-800 mb-4">Perfil</h2>
-            
+
             <div class="space-y-4">
               <div class="flex items-center gap-4">
                 <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-lilac-200 to-rose-200 flex items-center justify-center overflow-hidden">
-                  <img 
-                    v-if="linkBio.avatarUrl" 
-                    :src="linkBio.avatarUrl" 
+                  <img
+                    v-if="linkBio.avatarUrl"
+                    :src="linkBio.avatarUrl"
                     class="w-full h-full object-cover"
                   />
                   <Icon v-else name="lucide:camera" class="w-8 h-8 text-lilac-500" />
                 </div>
-                <button 
+                <button
                   @click="showPhotoModal = true"
                   class="px-4 py-2 rounded-xl bg-lilac-50 text-lilac-600 font-medium hover:bg-lilac-100 transition-all"
                 >
@@ -89,9 +89,9 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Título</label>
-                <input 
-                  type="text" 
+                <label class="block text-sm font-medium text-gray-700 mb-2">Titulo</label>
+                <input
+                  type="text"
                   v-model="linkBio.title"
                   class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none transition-all"
                 />
@@ -99,7 +99,7 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
-                <textarea 
+                <textarea
                   v-model="linkBio.bio"
                   rows="3"
                   class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none transition-all resize-none"
@@ -112,36 +112,36 @@
           <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
             <div class="flex items-center justify-between mb-4">
               <h2 class="font-display text-xl font-semibold text-gray-800">Links</h2>
-              <button 
+              <button
                 @click="addLink"
                 class="px-4 py-2 rounded-xl bg-lilac-50 text-lilac-600 font-medium hover:bg-lilac-100 transition-all"
               >
                 + Adicionar
               </button>
             </div>
-            
+
             <div class="space-y-3">
-              <div 
+              <div
                 v-for="(link, index) in linkBio.links"
                 :key="index"
                 class="flex items-center gap-3 p-3 rounded-xl bg-gray-50"
               >
                 <Icon name="lucide:grip-vertical" class="w-5 h-5 text-gray-400 cursor-grab" />
                 <div class="flex-1">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     v-model="link.title"
-                    placeholder="Título do link"
+                    placeholder="Titulo do link"
                     class="w-full bg-transparent font-medium text-gray-800 outline-none"
                   />
-                  <input 
-                    type="url" 
+                  <input
+                    type="url"
                     v-model="link.url"
                     placeholder="https://..."
                     class="w-full text-sm text-gray-500 bg-transparent outline-none"
                   />
                 </div>
-                <button 
+                <button
                   @click="removeLink(index)"
                   class="p-2 rounded-lg hover:bg-white transition-colors"
                 >
@@ -160,12 +160,12 @@
           <!-- Social -->
           <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
             <h2 class="font-display text-xl font-semibold text-gray-800 mb-4">Redes Sociais</h2>
-            
+
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   v-model="linkBio.instagram"
                   placeholder="@seuinstagram"
                   class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none transition-all"
@@ -173,8 +173,8 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Facebook</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   v-model="linkBio.facebook"
                   placeholder="facebook.com/..."
                   class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none transition-all"
@@ -182,8 +182,8 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">TikTok</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   v-model="linkBio.tiktok"
                   placeholder="@seutiktok"
                   class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none transition-all"
@@ -191,8 +191,8 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">WhatsApp</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   v-model="linkBio.whatsapp"
                   placeholder="(00) 00000-0000"
                   class="w-full px-4 py-3 rounded-xl bg-white border border-lilac-100 text-gray-700 focus:border-lilac-300 outline-none transition-all"
@@ -205,8 +205,8 @@
         <!-- Preview -->
         <div class="lg:sticky lg:top-24 h-fit">
           <div class="p-4 rounded-2xl bg-gray-100">
-            <p class="text-sm text-gray-500 text-center mb-3">Pré-visualização</p>
-            
+            <p class="text-sm text-gray-500 text-center mb-3">Pre-visualizacao</p>
+
             <!-- Phone Frame -->
             <div class="mx-auto w-72 bg-white rounded-[3rem] p-3 shadow-xl">
               <div class="bg-gradient-to-b from-rose-50 to-lilac-50 rounded-[2.5rem] overflow-hidden min-h-[500px]">
@@ -224,26 +224,26 @@
                 <div class="px-6 py-8 text-center">
                   <!-- Avatar -->
                   <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-lilac-400 to-rose-400 flex items-center justify-center overflow-hidden">
-                    <img 
-                      v-if="linkBio.avatarUrl" 
-                      :src="linkBio.avatarUrl" 
+                    <img
+                      v-if="linkBio.avatarUrl"
+                      :src="linkBio.avatarUrl"
                       class="w-full h-full object-cover"
                     />
                     <span v-else class="text-3xl font-bold text-white">{{ getInitials }}</span>
                   </div>
 
                   <!-- Title -->
-                  <h3 class="font-display text-xl font-semibold text-gray-800 mb-1">{{ linkBio.title || 'Seu Salão' }}</h3>
-                  <p class="text-sm text-gray-500 mb-6">{{ linkBio.bio || 'Descrição do seu salão' }}</p>
+                  <h3 class="font-display text-xl font-semibold text-gray-800 mb-1">{{ linkBio.title || 'Seu Salao' }}</h3>
+                  <p class="text-sm text-gray-500 mb-6">{{ linkBio.bio || 'Descricao do seu salao' }}</p>
 
                   <!-- Links -->
                   <div class="space-y-3">
-                    <button 
+                    <button
                       v-for="(link, index) in linkBio.links"
                       :key="index"
                       class="w-full py-3 px-4 rounded-xl bg-white border border-lilac-200 text-gray-800 font-medium hover:bg-lilac-50 transition-all shadow-sm"
                     >
-                      {{ link.title || 'Link sem título' }}
+                      {{ link.title || 'Link sem titulo' }}
                     </button>
                   </div>
 
@@ -264,7 +264,7 @@
                   </div>
 
                   <!-- Branding -->
-                  <p class="text-xs text-gray-400 mt-8">Feito com 💜 no PiuBelle</p>
+                  <p class="text-xs text-gray-400 mt-8">Feito com amor no PiuBelle</p>
                 </div>
               </div>
             </div>
@@ -274,8 +274,8 @@
     </template>
 
     <!-- Photo Modal -->
-    <div 
-      v-if="showPhotoModal" 
+    <div
+      v-if="showPhotoModal"
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       @click.self="showPhotoModal = false"
     >
@@ -286,18 +286,18 @@
             <Icon name="lucide:x" class="w-5 h-5 text-gray-500" />
           </button>
         </div>
-        
+
         <div class="p-6 space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">URL da Imagem</label>
-            <input 
+            <input
               v-model="newAvatarUrl"
               type="url"
               placeholder="https://exemplo.com/sua-foto.jpg"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
             <p class="text-xs text-gray-400 mt-2">
-              Cole a URL de uma imagem hospedada na internet (ex: Imgur, Google Drive público, etc.)
+              Cole a URL de uma imagem hospedada na internet (ex: Imgur, Google Drive publico, etc.)
             </p>
           </div>
 
@@ -305,30 +305,30 @@
             <div class="flex items-start gap-3">
               <Icon name="lucide:info" class="w-5 h-5 text-lilac-600 flex-shrink-0 mt-0.5" />
               <p class="text-sm text-lilac-700">
-                <strong>Dica:</strong> Você pode usar serviços gratuitos como Imgur ou PostImages para hospedar sua imagem e obter o link direto.
+                <strong>Dica:</strong> Voce pode usar servicos gratuitos como Imgur ou PostImages para hospedar sua imagem e obter o link direto.
               </p>
             </div>
           </div>
 
           <!-- Preview -->
           <div v-if="newAvatarUrl" class="text-center">
-            <p class="text-sm text-gray-500 mb-2">Pré-visualização:</p>
-            <img 
-              :src="newAvatarUrl" 
+            <p class="text-sm text-gray-500 mb-2">Pre-visualizacao:</p>
+            <img
+              :src="newAvatarUrl"
               class="w-20 h-20 rounded-2xl mx-auto object-cover border-2 border-lilac-200"
               @error="newAvatarUrl = ''"
             />
           </div>
         </div>
-        
+
         <div class="p-6 border-t border-gray-100 flex gap-3 justify-end">
-          <button 
+          <button
             @click="showPhotoModal = false"
             class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all"
           >
             Cancelar
           </button>
-          <button 
+          <button
             @click="savePhoto"
             :disabled="!newAvatarUrl"
             class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 transition-all disabled:opacity-50"
@@ -346,7 +346,7 @@ definePageMeta({
   layout: 'painel'
 })
 
-const { authHeaders } = useAuth()
+const { api } = useApi()
 const currentSalon = inject<Ref<any>>('currentSalon')
 
 const loading = ref(true)
@@ -393,13 +393,14 @@ const fetchLinkBio = async () => {
     return
   }
 
+  loading.value = true
   try {
-    const { data } = await useFetch(`/api/painel/link-bio?salonId=${currentSalon.value.id}`, {
-      headers: authHeaders.value
+    const { data, error } = await api<any>('/api/painel/link-bio', {
+      params: { salonId: currentSalon.value.id }
     })
 
-    if (data.value?.success && data.value.data) {
-      const d = data.value.data
+    if (!error && data?.data) {
+      const d = data.data
       linkBio.value = {
         title: d.title || currentSalon.value.name || '',
         bio: d.bio || '',
@@ -421,7 +422,6 @@ const fetchLinkBio = async () => {
     }
   } catch (error) {
     console.error('Erro ao buscar link bio:', error)
-    // Initialize with salon data
     linkBio.value.title = currentSalon?.value?.name || ''
   } finally {
     loading.value = false
@@ -434,14 +434,19 @@ const saveLinkBio = async () => {
   saving.value = true
   saved.value = false
   try {
-    await $fetch('/api/painel/link-bio', {
+    const { error } = await api('/api/painel/link-bio', {
       method: 'POST',
-      headers: authHeaders.value,
       body: {
         salonId: currentSalon.value.id,
         ...linkBio.value
       }
     })
+
+    if (error) {
+      alert(error)
+      return
+    }
+
     saved.value = true
     setTimeout(() => { saved.value = false }, 2000)
   } catch (error) {
@@ -458,12 +463,11 @@ const addLink = () => {
 
 const removeLink = (index: number) => {
   linkBio.value.links.splice(index, 1)
-  saveLinkBio()
 }
 
 const copyLink = async () => {
   if (!currentSalon?.value?.slug) return
-  
+
   const link = `${window.location.origin}/lp/${currentSalon.value.slug}`
   try {
     await navigator.clipboard.writeText(link)
@@ -479,16 +483,11 @@ const savePhoto = () => {
     linkBio.value.avatarUrl = newAvatarUrl.value
     showPhotoModal.value = false
     newAvatarUrl.value = ''
-    saveLinkBio()
   }
 }
 
 // Watch for salon changes
-watch(() => currentSalon?.value?.id, () => {
-  fetchLinkBio()
+watch(() => currentSalon?.value?.id, (newId) => {
+  if (newId) fetchLinkBio()
 }, { immediate: true })
-
-onMounted(() => {
-  fetchLinkBio()
-})
 </script>

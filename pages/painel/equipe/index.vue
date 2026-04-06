@@ -4,9 +4,9 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-display font-semibold text-gray-800">Equipe</h1>
-        <p class="text-gray-500">Gerencie as profissionais do seu salão</p>
+        <p class="text-gray-500">Gerencie as profissionais do seu salao</p>
       </div>
-      <button 
+      <button
         @click="openNewModal"
         class="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 transition-all shadow-glow"
       >
@@ -20,12 +20,24 @@
       <div class="w-8 h-8 border-4 border-lilac-200 border-t-lilac-500 rounded-full animate-spin"></div>
     </div>
 
+    <!-- Error State -->
+    <div v-else-if="errorMsg" class="text-center py-12">
+      <Icon name="lucide:alert-circle" class="w-12 h-12 text-red-300 mx-auto mb-3" />
+      <p class="text-gray-500">{{ errorMsg }}</p>
+      <button
+        @click="loadProfessionals"
+        class="mt-4 px-5 py-2.5 rounded-xl bg-lilac-50 text-lilac-600 font-medium hover:bg-lilac-100 transition-all"
+      >
+        Tentar novamente
+      </button>
+    </div>
+
     <!-- Empty State -->
     <div v-else-if="professionals.length === 0" class="text-center py-12">
       <Icon name="lucide:users" class="w-12 h-12 text-lilac-300 mx-auto mb-3" />
       <p class="text-gray-500">Nenhum profissional cadastrado</p>
       <p class="text-sm text-gray-400 mt-1">Adicione profissionais para gerenciar sua equipe</p>
-      <button 
+      <button
         @click="openNewModal"
         class="mt-4 px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium"
       >
@@ -35,7 +47,7 @@
 
     <!-- Team Grid -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div 
+      <div
         v-for="professional in professionals"
         :key="professional.id"
         class="p-6 rounded-2xl bg-white border border-lilac-100 hover:border-lilac-200 transition-all shadow-soft"
@@ -47,7 +59,7 @@
               <img v-if="professional.photo" :src="professional.photo" class="w-full h-full object-cover" />
               <span v-else class="text-2xl font-bold text-white">{{ getInitials(professional.name) }}</span>
             </div>
-            <span 
+            <span
               class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white"
               :class="professional.isActive ? 'bg-emerald-400' : 'bg-gray-300'"
             />
@@ -70,7 +82,7 @@
           </div>
           <div class="p-3 rounded-xl bg-rose-50">
             <p class="text-xl font-bold text-rose-600">{{ professional.appointmentsMonth || 0 }}</p>
-            <p class="text-xs text-gray-500">Este mês</p>
+            <p class="text-xs text-gray-500">Este mes</p>
           </div>
         </div>
 
@@ -78,7 +90,7 @@
         <div v-if="professional.specialties?.length" class="mb-4">
           <p class="text-xs text-gray-400 mb-2">Especialidades:</p>
           <div class="flex flex-wrap gap-1">
-            <span 
+            <span
               v-for="specialty in (professional.specialties || []).slice(0, 3)"
               :key="specialty"
               class="px-2 py-0.5 rounded-md bg-gray-100 text-xs text-gray-600"
@@ -93,13 +105,13 @@
 
         <!-- Actions -->
         <div class="flex gap-2">
-          <NuxtLink 
+          <NuxtLink
             :to="`/painel/agendamentos?professionalId=${professional.id}`"
             class="flex-1 py-2 rounded-xl bg-lilac-50 text-lilac-600 text-sm font-medium hover:bg-lilac-100 transition-all text-center"
           >
             Ver agenda
           </NuxtLink>
-          <button 
+          <button
             @click="editProfessional(professional)"
             class="flex-1 py-2 rounded-xl bg-gray-50 text-gray-600 text-sm font-medium hover:bg-gray-100 transition-all"
           >
@@ -110,57 +122,57 @@
     </div>
 
     <!-- Add/Edit Modal -->
-    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showModal = false">
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <div class="p-6 border-b border-gray-100">
           <h3 class="text-xl font-display font-semibold text-gray-800">
             {{ editingProfessional ? 'Editar Profissional' : 'Novo Profissional' }}
           </h3>
         </div>
-        
+
         <div class="p-6 space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
-            <input 
+            <input
               v-model="formData.name"
               type="text"
               placeholder="Nome completo"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
-            <input 
+            <input
               v-model="formData.email"
               type="email"
               placeholder="email@exemplo.com"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
-            <input 
+            <input
               v-model="formData.phone"
               type="tel"
               placeholder="(00) 00000-0000"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Cargo/Função</label>
-            <input 
+            <label class="block text-sm font-medium text-gray-700 mb-2">Cargo/Funcao</label>
+            <input
               v-model="formData.role"
               type="text"
               placeholder="Ex: Cabeleireira, Manicure"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div class="flex items-center gap-3">
-            <input 
+            <input
               v-model="formData.isActive"
               type="checkbox"
               id="isActive"
@@ -169,15 +181,15 @@
             <label for="isActive" class="text-sm text-gray-700">Profissional ativo</label>
           </div>
         </div>
-        
+
         <div class="p-6 border-t border-gray-100 flex gap-3 justify-end">
-          <button 
+          <button
             @click="showModal = false"
             class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all"
           >
             Cancelar
           </button>
-          <button 
+          <button
             @click="saveProfessional"
             :disabled="!formData.name || saving"
             class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 transition-all disabled:opacity-50"
@@ -195,11 +207,12 @@ definePageMeta({
   layout: 'painel'
 })
 
-const { authHeaders } = useAuth()
+const { api } = useApi()
 const currentSalon = inject('currentSalon') as Ref<any>
 
 const loading = ref(true)
 const saving = ref(false)
+const errorMsg = ref('')
 const showModal = ref(false)
 const editingProfessional = ref<any>(null)
 const professionals = ref<any[]>([])
@@ -213,6 +226,7 @@ const formData = ref({
 })
 
 const getInitials = (name: string) => {
+  if (!name) return '?'
   const names = name.split(' ')
   if (names.length >= 2) {
     return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase()
@@ -227,13 +241,21 @@ const loadProfessionals = async () => {
   }
 
   loading.value = true
+  errorMsg.value = ''
   try {
-    const res = await $fetch(`/api/painel/professionals?salonId=${currentSalon.value.id}`, {
-      headers: authHeaders.value
+    const { data, error } = await api<any>('/api/painel/professionals', {
+      params: { salonId: currentSalon.value.id }
     })
-    professionals.value = (res as any).data || []
+
+    if (error) {
+      errorMsg.value = error
+      return
+    }
+
+    professionals.value = data?.data || []
   } catch (error) {
     console.error('Erro ao carregar equipe:', error)
+    errorMsg.value = 'Erro ao carregar equipe. Tente novamente.'
   } finally {
     loading.value = false
   }
@@ -263,36 +285,39 @@ const saveProfessional = async () => {
   saving.value = true
   try {
     if (editingProfessional.value) {
-      await $fetch(`/api/painel/professionals/${editingProfessional.value.id}`, {
+      const { error } = await api(`/api/painel/professionals/${editingProfessional.value.id}`, {
         method: 'PUT',
-        headers: authHeaders.value,
         body: formData.value
       })
+      if (error) {
+        alert(error)
+        return
+      }
     } else {
-      await $fetch('/api/painel/professionals', {
+      const { error } = await api('/api/painel/professionals', {
         method: 'POST',
-        headers: authHeaders.value,
         body: {
           salonId: currentSalon.value.id,
           ...formData.value
         }
       })
+      if (error) {
+        alert(error)
+        return
+      }
     }
-    
+
     showModal.value = false
     await loadProfessionals()
   } catch (error) {
     console.error('Erro ao salvar profissional:', error)
+    alert('Erro ao salvar profissional')
   } finally {
     saving.value = false
   }
 }
 
-watch(() => currentSalon.value?.id, () => {
-  loadProfessionals()
+watch(() => currentSalon.value?.id, (newId) => {
+  if (newId) loadProfessionals()
 }, { immediate: true })
-
-onMounted(() => {
-  loadProfessionals()
-})
 </script>

@@ -1,5 +1,71 @@
 import { supabaseAdmin, isSupabaseConfigured } from '../../utils/supabase'
 
+/**
+ * Checks if a salon is currently open based on:
+ * 1. If manually_closed is true -> always closed
+ * 2. If no working_hours rows exist -> open by default
+ * 3. Otherwise checks current time against today's working hours
+ */
+async function checkIfOpen(salon: any): Promise<boolean> {
+  // If manually closed via dashboard toggle, always return false
+  if (salon.manually_closed) {
+    return false
+  }
+
+  // Only check working hours if Supabase is configured
+  if (!isSupabaseConfigured()) {
+    return true
+  }
+
+  const now = new Date()
+  // Use the salon timezone (default: America/Sao_Paulo)
+  const tz = salon.timezone || 'America/Sao_Paulo'
+
+  // Get current day of week (0=Sunday ... 6=Saturday)
+  const formatter = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short' })
+  const dayStr = formatter.format(now).toLowerCase() // e.g. 'mon', 'tue'
+
+  const dayMap: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
+  const dayNumber = dayMap[dayStr] ?? now.getDay()
+
+  // Fetch working hours for this salon
+  const { data: hours, error } = await supabaseAdmin
+    .from('salon_working_hours')
+    .select('*')
+    .eq('salon_id', salon.id)
+
+  // If no working_hours table/rows exist, default to open
+  if (error || !hours || hours.length === 0) {
+    return true
+  }
+
+  // Find today's entry
+  const todayHours = hours.find((h: any) => h.day_of_week === dayNumber)
+
+  // If no entry for today or closed today
+  if (!todayHours || todayHours.is_closed) {
+    return false
+  }
+
+  // Compare current time with open/close times
+  const timeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+  const currentTime = timeFormatter.format(now).replace(/\u200E/g, '') // e.g. "14:30"
+
+  const openTime = todayHours.open_time   // e.g. "09:00"
+  const closeTime = todayHours.close_time  // e.g. "18:00"
+
+  if (openTime && closeTime) {
+    return currentTime >= openTime && currentTime <= closeTime
+  }
+
+  return true
+}
+
 // Mockup para demonstração
 const mockupSalon = {
   id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
@@ -100,6 +166,9 @@ export default defineEventHandler(async (event) => {
         .eq('is_active', true)
         .order('sort_order', { ascending: true })
 
+      // Determine if salon is currently open
+      const isOpen = await checkIfOpen(salon)
+
       // Montar resposta
       return {
         id: salon.id,
@@ -118,7 +187,7 @@ export default defineEventHandler(async (event) => {
         city: [salon.address_city, salon.address_state].filter(Boolean).join(' - '),
         rating: salon.rating || 0,
         reviewCount: salon.review_count || 0,
-        isOpen: true,
+        isOpen,
         services: (services || []).map(s => ({
           id: s.id,
           name: s.name,

@@ -54,6 +54,8 @@ export default defineEventHandler(async (event) => {
       if (body.requireDeposit !== undefined) updateData.require_deposit = body.requireDeposit
       if (body.depositPercentage !== undefined) updateData.deposit_percentage = body.depositPercentage
       if (body.isActive !== undefined) updateData.is_active = body.isActive
+      if (body.isOpen !== undefined) updateData.manually_closed = !body.isOpen
+      if (body.manuallyClosed !== undefined) updateData.manually_closed = body.manuallyClosed
       // Metadata (free-form JSON) - e.g., { document: '123...' }
       if (body.metadata !== undefined) updateData.metadata = body.metadata
 
@@ -103,6 +105,8 @@ export default defineEventHandler(async (event) => {
           requireDeposit: data.require_deposit,
           depositPercentage: data.deposit_percentage,
           isActive: data.is_active,
+          isOpen: !data.manually_closed,
+          manuallyClosed: data.manually_closed ?? false,
           updatedAt: data.updated_at
         }
       }

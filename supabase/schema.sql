@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS public.salons (
   -- Status
   is_active BOOLEAN DEFAULT true,
   is_featured BOOLEAN DEFAULT false,
+  manually_closed BOOLEAN DEFAULT false,
   rating DECIMAL(2,1) DEFAULT 0,
   review_count INTEGER DEFAULT 0,
   
