@@ -119,8 +119,22 @@
           </div>
         </div>
 
+        <!-- Forgot Password (login only) -->
+        <div v-if="isLogin" class="flex justify-end">
+          <button
+            type="button"
+            class="text-sm text-lilac-600 hover:text-lilac-700 font-medium"
+            @click="handleForgotPassword"
+          >
+            Esqueci a senha
+          </button>
+        </div>
+
         <!-- Error Message -->
         <p v-if="error" class="text-red-500 text-sm text-center">{{ error }}</p>
+
+        <!-- Success Message -->
+        <p v-if="successMessage" class="text-emerald-600 text-sm text-center">{{ successMessage }}</p>
 
         <!-- Submit Button -->
         <button
@@ -180,6 +194,7 @@ const { login, register, isLoading } = useAuth()
 const isLogin = ref(true)
 const showPassword = ref(false)
 const error = ref('')
+const successMessage = ref('')
 
 const form = ref({
   fullName: '',
@@ -189,11 +204,33 @@ const form = ref({
   role: 'client'
 })
 
+const handleForgotPassword = async () => {
+  error.value = ''
+  successMessage.value = ''
+
+  if (!form.value.email) {
+    error.value = 'Preencha o e-mail acima para recuperar a senha'
+    return
+  }
+
+  try {
+    await $fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      body: { email: form.value.email }
+    })
+    successMessage.value = 'Se esse e-mail estiver cadastrado, enviaremos um link de recuperação.'
+  } catch {
+    // Always show success to avoid email enumeration
+    successMessage.value = 'Se esse e-mail estiver cadastrado, enviaremos um link de recuperação.'
+  }
+}
+
 const handleSubmit = async () => {
   error.value = ''
-  
+  successMessage.value = ''
+
   let result
-  
+
   if (isLogin.value) {
     result = await login(form.value.email, form.value.password)
   } else {
@@ -205,12 +242,12 @@ const handleSubmit = async () => {
       role: form.value.role
     })
   }
-  
+
   if (result.success) {
     modelValue.value = false
     emit('success')
   } else {
-    error.value = result.error || 'Erro ao processar'
+    error.value = result.message || 'Erro ao processar'
   }
 }
 
@@ -218,6 +255,7 @@ const handleSubmit = async () => {
 watch(modelValue, (value) => {
   if (!value) {
     error.value = ''
+    successMessage.value = ''
     form.value = {
       fullName: '',
       email: '',

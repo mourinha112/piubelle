@@ -20,15 +20,17 @@
       <div class="relative mb-8 fade-in-up stagger-1 animate-hidden">
         <div class="relative">
           <Icon name="lucide:search" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input 
+          <input
             v-model="searchQuery"
             type="text"
             placeholder="Encontre seu salão perfeito..."
             class="w-full pl-14 pr-28 py-5 rounded-2xl bg-white border-2 border-lilac-100 text-gray-800 placeholder-gray-400 focus:border-lilac-300 focus:ring-4 focus:ring-lilac-100 outline-none transition-all shadow-soft text-base"
             @focus="showSearchSuggestions = true"
+            @keyup.enter="handleSearch"
           />
-          <button 
+          <button
             class="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold text-sm hover:from-lilac-600 hover:to-rose-600 transition-all shadow-glow"
+            @click="handleSearch"
           >
             Buscar
           </button>
@@ -78,6 +80,11 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
+const emit = defineEmits<{
+  (e: 'search', query: string): void
+  (e: 'filter', filterId: string): void
+}>()
+
 const searchQuery = ref('')
 const showSearchSuggestions = ref(false)
 const activeFilter = ref('all')
@@ -116,19 +123,33 @@ const filteredSuggestions = computed(() => {
   )
 })
 
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    showSearchSuggestions.value = false
+    emit('search', searchQuery.value.trim())
+  }
+}
+
 const selectSuggestion = (suggestion: string) => {
   searchQuery.value = suggestion
   showSearchSuggestions.value = false
+  handleSearch()
 }
 
 // Close suggestions when clicking outside
+const onDocumentClick = (e: MouseEvent) => {
+  const target = e.target as HTMLElement
+  if (!target.closest('.relative')) {
+    showSearchSuggestions.value = false
+  }
+}
+
 onMounted(() => {
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement
-    if (!target.closest('.relative')) {
-      showSearchSuggestions.value = false
-    }
-  })
+  document.addEventListener('click', onDocumentClick)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 

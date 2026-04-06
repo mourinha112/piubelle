@@ -7,19 +7,26 @@
         <p class="text-gray-500">{{ formattedDate }}</p>
       </div>
       <div class="flex gap-3">
-        <button 
+        <button
+          @click="exportCSV"
+          class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-lilac-100 text-gray-600 hover:border-lilac-200 transition-all shadow-soft"
+        >
+          <Icon name="lucide:download" class="w-5 h-5" />
+          Exportar CSV
+        </button>
+        <button
           @click="openTransactionModal('income')"
           class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-600 font-medium hover:bg-emerald-100 transition-all"
         >
           <Icon name="lucide:plus" class="w-5 h-5" />
           Entrada
         </button>
-        <button 
+        <button
           @click="openTransactionModal('expense')"
           class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-all"
         >
           <Icon name="lucide:minus" class="w-5 h-5" />
-          Saída
+          Saida
         </button>
       </div>
     </div>
@@ -38,14 +45,14 @@
             <p class="text-4xl font-bold">R$ {{ cashRegister.currentBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</p>
           </div>
           <div class="flex gap-3">
-            <button 
+            <button
               v-if="!cashRegister.isOpen"
               @click="openCashRegister"
               class="px-6 py-3 rounded-xl bg-white text-lilac-600 font-semibold hover:bg-lilac-50 transition-all"
             >
               Abrir Caixa
             </button>
-            <button 
+            <button
               v-else
               @click="closeCashRegister"
               class="px-6 py-3 rounded-xl bg-white/20 text-white font-semibold hover:bg-white/30 transition-all"
@@ -65,7 +72,7 @@
             <p class="text-xl font-bold text-emerald-200">+R$ {{ cashRegister.totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</p>
           </div>
           <div class="p-4 rounded-xl bg-white/10">
-            <p class="text-sm text-red-200">Saídas</p>
+            <p class="text-sm text-red-200">Saidas</p>
             <p class="text-xl font-bold text-red-200">-R$ {{ cashRegister.totalExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</p>
           </div>
           <div class="p-4 rounded-xl bg-white/10">
@@ -100,7 +107,7 @@
             <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
               <Icon name="lucide:credit-card" class="w-5 h-5 text-blue-600" />
             </div>
-            <span class="text-gray-600">Crédito</span>
+            <span class="text-gray-600">Credito</span>
           </div>
           <p class="text-2xl font-bold text-gray-800">R$ {{ paymentSummary.credit.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</p>
         </div>
@@ -109,7 +116,7 @@
             <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
               <Icon name="lucide:credit-card" class="w-5 h-5 text-purple-600" />
             </div>
-            <span class="text-gray-600">Débito</span>
+            <span class="text-gray-600">Debito</span>
           </div>
           <p class="text-2xl font-bold text-gray-800">R$ {{ paymentSummary.debit.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</p>
         </div>
@@ -118,36 +125,36 @@
       <!-- Today's Movements -->
       <div class="bg-white rounded-2xl border border-lilac-100 shadow-soft overflow-hidden">
         <div class="p-4 bg-gradient-to-r from-lilac-50 to-rose-50 border-b border-lilac-100">
-          <h2 class="font-semibold text-gray-800">Movimentações de Hoje</h2>
+          <h2 class="font-semibold text-gray-800">Movimentacoes de Hoje</h2>
         </div>
-        
+
         <div class="divide-y divide-lilac-50">
-          <div 
+          <div
             v-for="movement in movements"
             :key="movement.id"
             class="flex items-center justify-between p-4 hover:bg-lilac-50/30 transition-colors"
           >
             <div class="flex items-center gap-4">
-              <div 
+              <div
                 class="w-10 h-10 rounded-xl flex items-center justify-center"
                 :class="movement.type === 'income' ? 'bg-emerald-100' : 'bg-red-100'"
               >
-                <Icon 
-                  :name="movement.type === 'income' ? 'lucide:arrow-down-left' : 'lucide:arrow-up-right'" 
+                <Icon
+                  :name="movement.type === 'income' ? 'lucide:arrow-down-left' : 'lucide:arrow-up-right'"
                   class="w-5 h-5"
                   :class="movement.type === 'income' ? 'text-emerald-600' : 'text-red-600'"
                 />
               </div>
               <div>
                 <p class="font-medium text-gray-800">{{ movement.description }}</p>
-                <p class="text-sm text-gray-500">{{ formatTime(movement.createdAt) }} • {{ movement.paymentMethod }}</p>
+                <p class="text-sm text-gray-500">{{ formatTime(movement.createdAt) }} - {{ getPaymentMethodLabel(movement.paymentMethod) }}</p>
               </div>
             </div>
-            <span 
+            <span
               class="font-semibold"
               :class="movement.type === 'income' ? 'text-emerald-600' : 'text-red-600'"
             >
-              {{ movement.type === 'income' ? '+' : '-' }}R$ {{ movement.amount.toFixed(2) }}
+              {{ movement.type === 'income' ? '+' : '-' }}R$ {{ parseFloat(movement.amount).toFixed(2) }}
             </span>
           </div>
         </div>
@@ -155,8 +162,8 @@
         <!-- Empty State -->
         <div v-if="movements.length === 0" class="text-center py-12">
           <Icon name="lucide:receipt" class="w-12 h-12 text-lilac-300 mx-auto mb-3" />
-          <p class="text-gray-500">Nenhuma movimentação hoje</p>
-          <p class="text-sm text-gray-400 mt-1">As entradas e saídas aparecerão aqui</p>
+          <p class="text-gray-500">Nenhuma movimentacao hoje</p>
+          <p class="text-sm text-gray-400 mt-1">As entradas e saidas aparecerao aqui</p>
         </div>
       </div>
     </template>
@@ -166,24 +173,24 @@
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <div class="p-6 border-b border-gray-100">
           <h3 class="text-xl font-display font-semibold text-gray-800">
-            {{ transactionType === 'income' ? 'Registrar Entrada' : 'Registrar Saída' }}
+            {{ transactionType === 'income' ? 'Registrar Entrada' : 'Registrar Saida' }}
           </h3>
         </div>
-        
+
         <div class="p-6 space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Descrição *</label>
-            <input 
+            <label class="block text-sm font-medium text-gray-700 mb-2">Descricao *</label>
+            <input
               v-model="newTransaction.description"
               type="text"
-              placeholder="Ex: Pagamento de serviço"
+              placeholder="Ex: Pagamento de servico"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Valor (R$) *</label>
-            <input 
+            <input
               v-model.number="newTransaction.amount"
               type="number"
               step="0.01"
@@ -192,34 +199,34 @@
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Forma de Pagamento</label>
-            <select 
+            <select
               v-model="newTransaction.paymentMethod"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             >
               <option value="cash">Dinheiro</option>
               <option value="pix">PIX</option>
-              <option value="credit">Cartão de Crédito</option>
-              <option value="debit">Cartão de Débito</option>
+              <option value="credit">Cartao de Credito</option>
+              <option value="debit">Cartao de Debito</option>
             </select>
           </div>
         </div>
-        
+
         <div class="p-6 border-t border-gray-100 flex gap-3 justify-end">
-          <button 
+          <button
             @click="showTransactionModal = false"
             class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all"
           >
             Cancelar
           </button>
-          <button 
+          <button
             @click="saveTransaction"
-            :disabled="!newTransaction.description || !newTransaction.amount"
+            :disabled="!newTransaction.description || !newTransaction.amount || savingTransaction"
             class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 transition-all disabled:opacity-50"
           >
-            Salvar
+            {{ savingTransaction ? 'Salvando...' : 'Salvar' }}
           </button>
         </div>
       </div>
@@ -228,23 +235,22 @@
 </template>
 
 <script setup lang="ts">
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-
 definePageMeta({
   layout: 'painel'
 })
 
-const { authHeaders } = useAuth()
-const currentSalon = inject<Ref<any>>('currentSalon')
+const { currentSalon } = useAuth()
+const { api } = useApi()
 
 const loading = ref(true)
 const showTransactionModal = ref(false)
 const transactionType = ref<'income' | 'expense'>('income')
 const movements = ref<any[]>([])
+const savingTransaction = ref(false)
 
 const formattedDate = computed(() => {
-  return format(new Date(), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })
+  const d = new Date()
+  return d.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 })
 
 const cashRegister = ref({
@@ -269,9 +275,23 @@ const newTransaction = ref({
   paymentMethod: 'cash'
 })
 
+const paymentMethodLabels: Record<string, string> = {
+  cash: 'Dinheiro',
+  pix: 'PIX',
+  credit: 'Cartao de Credito',
+  credit_card: 'Cartao de Credito',
+  debit: 'Cartao de Debito',
+  debit_card: 'Cartao de Debito'
+}
+
+const getPaymentMethodLabel = (method: string) => {
+  return paymentMethodLabels[method] || method
+}
+
 const formatTime = (dateStr: string) => {
+  if (!dateStr) return '--:--'
   try {
-    return format(new Date(dateStr), 'HH:mm')
+    return new Date(dateStr).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   } catch {
     return '--:--'
   }
@@ -279,22 +299,24 @@ const formatTime = (dateStr: string) => {
 
 // Fetch cash register data
 const fetchCashRegister = async () => {
-  if (!currentSalon?.value?.id) {
+  if (!currentSalon.value?.id) {
     loading.value = false
     return
   }
 
+  loading.value = true
   try {
-    const { data } = await useFetch(`/api/painel/transactions?salonId=${currentSalon.value.id}&date=${new Date().toISOString().split('T')[0]}`, {
-      headers: authHeaders.value
+    const today = new Date().toISOString().split('T')[0]
+    const { data: res, error } = await api<any>('/api/painel/transactions', {
+      params: { salonId: currentSalon.value.id, date: today }
     })
 
-    if (data.value?.success) {
-      movements.value = data.value.data || []
+    if (!error && res) {
+      movements.value = res.data || res || []
       calculateSummary()
     }
-  } catch (error) {
-    console.error('Erro ao buscar caixa:', error)
+  } catch (err) {
+    console.error('Erro ao buscar caixa:', err)
   } finally {
     loading.value = false
   }
@@ -315,8 +337,8 @@ const calculateSummary = () => {
       switch (m.paymentMethod) {
         case 'cash': cash += amount; break
         case 'pix': pix += amount; break
-        case 'credit': credit += amount; break
-        case 'debit': debit += amount; break
+        case 'credit': case 'credit_card': credit += amount; break
+        case 'debit': case 'debit_card': debit += amount; break
       }
     } else {
       expense += amount
@@ -324,7 +346,7 @@ const calculateSummary = () => {
   })
 
   cashRegister.value = {
-    isOpen: true,
+    isOpen: movements.value.length > 0,
     openingAmount: 0,
     currentBalance: income - expense,
     totalIncome: income,
@@ -342,12 +364,12 @@ const openTransactionModal = (type: 'income' | 'expense') => {
 }
 
 const saveTransaction = async () => {
-  if (!newTransaction.value.description || !newTransaction.value.amount || !currentSalon?.value?.id) return
+  if (!newTransaction.value.description || !newTransaction.value.amount || !currentSalon.value?.id) return
 
+  savingTransaction.value = true
   try {
-    const { data } = await useFetch('/api/painel/transactions', {
+    const { data: res, error } = await api<any>('/api/painel/transactions', {
       method: 'POST',
-      headers: authHeaders.value,
       body: {
         salonId: currentSalon.value.id,
         type: transactionType.value,
@@ -357,30 +379,53 @@ const saveTransaction = async () => {
       }
     })
 
-    if (data.value?.success) {
-      movements.value.unshift(data.value.data)
+    if (!error && res) {
+      const newEntry = res.data || res
+      movements.value.unshift(newEntry)
       calculateSummary()
       showTransactionModal.value = false
+    } else {
+      console.error('Erro ao salvar transacao:', error)
     }
-  } catch (error) {
-    console.error('Erro ao salvar transação:', error)
+  } catch (err) {
+    console.error('Erro ao salvar transacao:', err)
+  } finally {
+    savingTransaction.value = false
   }
 }
 
-const openCashRegister = async () => {
+const openCashRegister = () => {
   cashRegister.value.isOpen = true
 }
 
-const closeCashRegister = async () => {
+const closeCashRegister = () => {
   cashRegister.value.isOpen = false
 }
 
+const exportCSV = () => {
+  if (movements.value.length === 0) return
+
+  const headers = ['Descricao', 'Tipo', 'Valor', 'Forma de Pagamento', 'Data/Hora']
+  const rows = movements.value.map((m: any) => {
+    const amount = parseFloat(m.amount) || 0
+    const type = m.type === 'income' ? 'Entrada' : 'Saida'
+    const method = getPaymentMethodLabel(m.paymentMethod)
+    const date = m.createdAt ? new Date(m.createdAt).toLocaleString('pt-BR') : ''
+    return [m.description, type, amount.toFixed(2), method, date].join(';')
+  })
+
+  const csvContent = [headers.join(';'), ...rows].join('\n')
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `caixa-${new Date().toISOString().split('T')[0]}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 // Watch for salon changes
-watch(() => currentSalon?.value?.id, () => {
+watch(() => currentSalon.value?.id, () => {
   fetchCashRegister()
 }, { immediate: true })
-
-onMounted(() => {
-  fetchCashRegister()
-})
 </script>

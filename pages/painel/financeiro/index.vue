@@ -4,18 +4,21 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-display font-semibold text-gray-800">Financeiro</h1>
-        <p class="text-gray-500">Acompanhe as finanças do seu salão</p>
+        <p class="text-gray-500">Acompanhe as financas do seu salao</p>
       </div>
       <div class="flex gap-3">
-        <select 
+        <select
           v-model="selectedPeriod"
           class="px-4 py-2 rounded-xl bg-white border border-lilac-100 text-gray-700 shadow-soft outline-none"
         >
-          <option value="month">Este mês</option>
+          <option value="month">Este mes</option>
           <option value="week">Esta semana</option>
           <option value="today">Hoje</option>
         </select>
-        <button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-lilac-100 text-gray-600 hover:border-lilac-200 transition-all shadow-soft">
+        <button
+          @click="exportCSV"
+          class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-lilac-100 text-gray-600 hover:border-lilac-200 transition-all shadow-soft"
+        >
           <Icon name="lucide:download" class="w-5 h-5" />
           Exportar
         </button>
@@ -55,7 +58,7 @@
             <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
               <Icon name="lucide:wallet" class="w-6 h-6" />
             </div>
-            <span class="text-lilac-100">Lucro líquido</span>
+            <span class="text-lilac-100">Lucro liquido</span>
           </div>
           <p class="text-3xl font-bold">R$ {{ financialStats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</p>
         </div>
@@ -65,7 +68,7 @@
             <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
               <Icon name="lucide:receipt" class="w-6 h-6" />
             </div>
-            <span class="text-amber-100">Transações</span>
+            <span class="text-amber-100">Transacoes</span>
           </div>
           <p class="text-3xl font-bold">{{ financialStats.count }}</p>
         </div>
@@ -76,42 +79,42 @@
         <!-- Recent Transactions -->
         <div class="lg:col-span-2 p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
           <div class="flex items-center justify-between mb-6">
-            <h2 class="font-display text-xl font-semibold text-gray-800">Transações Recentes</h2>
-            <NuxtLink to="/painel/caixa" class="text-sm text-lilac-600 font-medium hover:text-lilac-700">Ver todas →</NuxtLink>
+            <h2 class="font-display text-xl font-semibold text-gray-800">Transacoes Recentes</h2>
+            <NuxtLink to="/painel/caixa" class="text-sm text-lilac-600 font-medium hover:text-lilac-700">Ver todas</NuxtLink>
           </div>
 
           <div v-if="recentTransactions.length === 0" class="text-center py-8">
             <Icon name="lucide:receipt" class="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p class="text-gray-500">Nenhuma transação registrada</p>
+            <p class="text-gray-500">Nenhuma transacao registrada</p>
           </div>
 
           <div v-else class="space-y-3">
-            <div 
+            <div
               v-for="transaction in recentTransactions"
               :key="transaction.id"
               class="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-lilac-50/50 transition-colors"
             >
               <div class="flex items-center gap-4">
-                <div 
+                <div
                   class="w-10 h-10 rounded-xl flex items-center justify-center"
                   :class="transaction.type === 'income' ? 'bg-emerald-100' : 'bg-red-100'"
                 >
-                  <Icon 
-                    :name="transaction.type === 'income' ? 'lucide:arrow-down-left' : 'lucide:arrow-up-right'" 
+                  <Icon
+                    :name="transaction.type === 'income' ? 'lucide:arrow-down-left' : 'lucide:arrow-up-right'"
                     class="w-5 h-5"
                     :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-red-600'"
                   />
                 </div>
                 <div>
                   <p class="font-medium text-gray-800">{{ transaction.description }}</p>
-                  <p class="text-sm text-gray-500">{{ transaction.date }} • {{ getPaymentMethodLabel(transaction.paymentMethod) }}</p>
+                  <p class="text-sm text-gray-500">{{ formatDate(transaction.createdAt) }} - {{ getPaymentMethodLabel(transaction.paymentMethod) }}</p>
                 </div>
               </div>
-              <span 
+              <span
                 class="font-semibold"
                 :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-red-600'"
               >
-                {{ transaction.type === 'income' ? '+' : '-' }}R$ {{ transaction.amount.toFixed(2) }}
+                {{ transaction.type === 'income' ? '+' : '-' }}R$ {{ parseFloat(transaction.amount).toFixed(2) }}
               </span>
             </div>
           </div>
@@ -119,8 +122,8 @@
 
         <!-- Payment Methods -->
         <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
-          <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Por Método de Pagamento</h2>
-          
+          <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Por Metodo de Pagamento</h2>
+
           <div v-if="paymentMethods.length === 0" class="text-center py-8">
             <Icon name="lucide:credit-card" class="w-10 h-10 text-gray-300 mx-auto mb-2" />
             <p class="text-gray-500">Sem dados</p>
@@ -133,7 +136,7 @@
                 <span class="font-semibold text-gray-800">R$ {{ method.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</span>
               </div>
               <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
-                <div 
+                <div
                   class="h-full rounded-full transition-all"
                   :class="method.color"
                   :style="{ width: `${method.percentage}%` }"
@@ -149,17 +152,16 @@
 </template>
 
 <script setup lang="ts">
-import { format, subDays, startOfMonth, startOfWeek } from 'date-fns'
-
 definePageMeta({
   layout: 'painel'
 })
 
-const { authHeaders } = useAuth()
-const currentSalon = inject('currentSalon') as Ref<any>
+const { currentSalon } = useAuth()
+const { api } = useApi()
 
 const loading = ref(true)
 const selectedPeriod = ref('month')
+const allTransactions = ref<any[]>([])
 const recentTransactions = ref<any[]>([])
 
 const financialStats = ref({
@@ -174,36 +176,46 @@ const paymentMethods = ref<any[]>([])
 const paymentMethodLabels: Record<string, string> = {
   cash: 'Dinheiro',
   pix: 'PIX',
-  credit: 'Cartão de Crédito',
-  credit_card: 'Cartão de Crédito',
-  debit: 'Cartão de Débito',
-  debit_card: 'Cartão de Débito'
+  credit: 'Cartao de Credito',
+  credit_card: 'Cartao de Credito',
+  debit: 'Cartao de Debito',
+  debit_card: 'Cartao de Debito'
 }
 
 const getPaymentMethodLabel = (method: string) => {
   return paymentMethodLabels[method] || method
 }
 
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return ''
+  try {
+    return new Date(dateStr).toLocaleDateString('pt-BR')
+  } catch {
+    return dateStr
+  }
+}
+
 const getDateRange = () => {
   const today = new Date()
   let startDate: Date
-  
+
   switch (selectedPeriod.value) {
     case 'today':
       startDate = today
       break
-    case 'week':
-      startDate = startOfWeek(today)
+    case 'week': {
+      startDate = new Date(today)
+      const day = startDate.getDay()
+      startDate.setDate(startDate.getDate() - day)
       break
+    }
     case 'month':
     default:
-      startDate = startOfMonth(today)
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1)
   }
 
-  return {
-    startDate: format(startDate, 'yyyy-MM-dd'),
-    endDate: format(today, 'yyyy-MM-dd')
-  }
+  const fmt = (d: Date) => d.toISOString().split('T')[0]
+  return { startDate: fmt(startDate), endDate: fmt(today) }
 }
 
 const loadFinancialData = async () => {
@@ -215,40 +227,62 @@ const loadFinancialData = async () => {
   loading.value = true
   try {
     const { startDate, endDate } = getDateRange()
-    
-    const res = await $fetch(`/api/painel/transactions?salonId=${currentSalon.value.id}&startDate=${startDate}&endDate=${endDate}`, {
-      headers: authHeaders.value
+
+    const { data: res, error } = await api<any>('/api/painel/transactions', {
+      params: { salonId: currentSalon.value.id, startDate, endDate }
     })
-    
-    if ((res as any).success) {
-      recentTransactions.value = ((res as any).data || []).slice(0, 10)
-      
-      const summary = (res as any).summary || {}
-      financialStats.value = {
-        totalIncome: summary.totalIncome || 0,
-        totalExpense: summary.totalExpense || 0,
-        balance: summary.balance || 0,
-        count: summary.count || 0
+
+    if (!error && res) {
+      const transactions = res.data || res || []
+      allTransactions.value = Array.isArray(transactions) ? transactions : []
+      recentTransactions.value = allTransactions.value.slice(0, 10)
+
+      // Check if API returned a summary, otherwise calculate from data
+      const summary = res.summary
+      if (summary) {
+        financialStats.value = {
+          totalIncome: summary.totalIncome || 0,
+          totalExpense: summary.totalExpense || 0,
+          balance: summary.balance || (summary.totalIncome || 0) - (summary.totalExpense || 0),
+          count: summary.count || allTransactions.value.length
+        }
+      } else {
+        // Calculate from transaction data
+        let totalIncome = 0
+        let totalExpense = 0
+        allTransactions.value.forEach((t: any) => {
+          const amount = parseFloat(t.amount) || 0
+          if (t.type === 'income') {
+            totalIncome += amount
+          } else {
+            totalExpense += amount
+          }
+        })
+        financialStats.value = {
+          totalIncome,
+          totalExpense,
+          balance: totalIncome - totalExpense,
+          count: allTransactions.value.length
+        }
       }
 
-      // Calculate payment methods breakdown
-      calculatePaymentMethods((res as any).data || [])
+      calculatePaymentMethods(allTransactions.value)
     }
-  } catch (error) {
-    console.error('Erro ao carregar dados financeiros:', error)
+  } catch (err) {
+    console.error('Erro ao carregar dados financeiros:', err)
   } finally {
     loading.value = false
   }
 }
 
 const calculatePaymentMethods = (transactions: any[]) => {
-  const incomeTransactions = transactions.filter(t => t.type === 'income')
-  const total = incomeTransactions.reduce((sum, t) => sum + (t.amount || 0), 0)
+  const incomeTransactions = transactions.filter((t: any) => t.type === 'income')
+  const total = incomeTransactions.reduce((sum: number, t: any) => sum + (parseFloat(t.amount) || 0), 0)
 
   const methodsMap: Record<string, number> = {}
-  incomeTransactions.forEach(t => {
+  incomeTransactions.forEach((t: any) => {
     const method = t.paymentMethod || 'other'
-    methodsMap[method] = (methodsMap[method] || 0) + (t.amount || 0)
+    methodsMap[method] = (methodsMap[method] || 0) + (parseFloat(t.amount) || 0)
   })
 
   const colors: Record<string, string> = {
@@ -270,6 +304,28 @@ const calculatePaymentMethods = (transactions: any[]) => {
     .sort((a, b) => b.amount - a.amount)
 }
 
+const exportCSV = () => {
+  if (allTransactions.value.length === 0) return
+
+  const headers = ['Descricao', 'Tipo', 'Valor', 'Forma de Pagamento', 'Data']
+  const rows = allTransactions.value.map((t: any) => {
+    const amount = parseFloat(t.amount) || 0
+    const type = t.type === 'income' ? 'Entrada' : 'Saida'
+    const method = getPaymentMethodLabel(t.paymentMethod)
+    const date = t.createdAt ? new Date(t.createdAt).toLocaleString('pt-BR') : ''
+    return [t.description, type, amount.toFixed(2), method, date].join(';')
+  })
+
+  const csvContent = [headers.join(';'), ...rows].join('\n')
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `financeiro-${selectedPeriod.value}-${new Date().toISOString().split('T')[0]}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 watch(selectedPeriod, () => {
   loadFinancialData()
 })
@@ -277,8 +333,4 @@ watch(selectedPeriod, () => {
 watch(() => currentSalon.value?.id, () => {
   loadFinancialData()
 }, { immediate: true })
-
-onMounted(() => {
-  loadFinancialData()
-})
 </script>

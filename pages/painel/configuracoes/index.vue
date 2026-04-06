@@ -140,13 +140,24 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Slug (URL)</label>
               <div class="flex items-center">
                 <span class="px-3 py-3 rounded-l-xl bg-gray-100 border border-r-0 border-lilac-100 text-gray-500 text-sm">
-                  piubelle.com/
+                  piubelle.com/salao/
                 </span>
                 <input
                   v-model="settings.slug"
                   type="text"
                   class="flex-1 px-4 py-3 rounded-r-xl bg-gray-50 border border-lilac-100 text-gray-800 focus:border-lilac-400 focus:bg-white outline-none transition-all"
                 />
+              </div>
+              <div v-if="settings.slug" class="flex items-center gap-2 mt-2">
+                <span class="text-xs text-gray-500 truncate">{{ publicLink }}</span>
+                <button
+                  type="button"
+                  class="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium bg-lilac-50 text-lilac-700 hover:bg-lilac-100 transition-colors flex items-center gap-1"
+                  @click="copyLink"
+                >
+                  <Icon :name="linkCopied ? 'lucide:check' : 'lucide:copy'" class="w-3.5 h-3.5" />
+                  {{ linkCopied ? 'Copiado!' : 'Copiar' }}
+                </button>
               </div>
             </div>
           </div>
@@ -401,9 +412,18 @@
         </div>
       </div>
 
-      <div class="flex justify-end mt-6">
-        <button class="px-6 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold hover:from-lilac-600 hover:to-rose-600 transition-all flex items-center gap-2 shadow-glow">
-          <Icon name="lucide:save" class="w-5 h-5" />
+      <div class="flex items-center justify-end gap-3 mt-6">
+        <span v-if="savedHours" class="text-emerald-600 text-sm font-medium flex items-center gap-1">
+          <Icon name="lucide:check-circle" class="w-4 h-4" />
+          Horários salvos!
+        </span>
+        <button
+          :disabled="savingHours"
+          class="px-6 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold hover:from-lilac-600 hover:to-rose-600 disabled:opacity-50 transition-all flex items-center gap-2 shadow-glow"
+          @click="saveHours"
+        >
+          <Icon v-if="savingHours" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+          <Icon v-else name="lucide:save" class="w-5 h-5" />
           Salvar Horários
         </button>
       </div>
@@ -475,9 +495,18 @@
           </div>
         </div>
 
-        <div class="flex justify-end mt-6">
-          <button class="px-6 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold hover:from-lilac-600 hover:to-rose-600 transition-all flex items-center gap-2 shadow-glow">
-            <Icon name="lucide:save" class="w-5 h-5" />
+        <div class="flex items-center justify-end gap-3 mt-6">
+          <span v-if="savedBooking" class="text-emerald-600 text-sm font-medium flex items-center gap-1">
+            <Icon name="lucide:check-circle" class="w-4 h-4" />
+            Configurações salvas!
+          </span>
+          <button
+            :disabled="savingBooking"
+            class="px-6 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-semibold hover:from-lilac-600 hover:to-rose-600 disabled:opacity-50 transition-all flex items-center gap-2 shadow-glow"
+            @click="saveBookingSettings"
+          >
+            <Icon v-if="savingBooking" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+            <Icon v-else name="lucide:save" class="w-5 h-5" />
             Salvar Configurações
           </button>
         </div>
@@ -596,6 +625,35 @@ const settings = ref({
   requireDeposit: false,
   depositPercentage: 20
 })
+
+const savingHours = ref(false)
+const savedHours = ref(false)
+const savingBooking = ref(false)
+const savedBooking = ref(false)
+const linkCopied = ref(false)
+
+const publicLink = computed(() => {
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://piubelle.com'
+  return `${origin}/salao/${settings.value.slug}`
+})
+
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(publicLink.value)
+    linkCopied.value = true
+    setTimeout(() => { linkCopied.value = false }, 2000)
+  } catch {
+    // Fallback for older browsers
+    const input = document.createElement('input')
+    input.value = publicLink.value
+    document.body.appendChild(input)
+    input.select()
+    document.execCommand('copy')
+    document.body.removeChild(input)
+    linkCopied.value = true
+    setTimeout(() => { linkCopied.value = false }, 2000)
+  }
+}
 
 const uploadingLogo = ref(false)
 const uploadingCover = ref(false)
@@ -791,6 +849,68 @@ const saveGeneral = async () => {
     alert('Erro ao salvar configurações')
   } finally {
     saving.value = false
+  }
+}
+
+const saveHours = async () => {
+  if (!currentSalon.value?.id) return
+
+  savingHours.value = true
+  savedHours.value = false
+
+  try {
+    const hours = workingHours.value.map(day => ({
+      dayOfWeek: day.dayOfWeek,
+      isOpen: day.isOpen,
+      openTime: day.openTime,
+      closeTime: day.closeTime,
+      hasBreak: day.hasBreak,
+      breakStart: day.breakStart,
+      breakEnd: day.breakEnd
+    }))
+
+    await $fetch(`/api/painel/salon/${currentSalon.value.id}`, {
+      method: 'PUT',
+      headers: authHeaders.value,
+      body: { workingHours: hours }
+    })
+
+    savedHours.value = true
+    setTimeout(() => { savedHours.value = false }, 3000)
+  } catch (error) {
+    console.error('Erro ao salvar horários:', error)
+    alert('Erro ao salvar horários')
+  } finally {
+    savingHours.value = false
+  }
+}
+
+const saveBookingSettings = async () => {
+  if (!currentSalon.value?.id) return
+
+  savingBooking.value = true
+  savedBooking.value = false
+
+  try {
+    await $fetch(`/api/painel/salon/${currentSalon.value.id}`, {
+      method: 'PUT',
+      headers: authHeaders.value,
+      body: {
+        autoConfirmBooking: settings.value.autoConfirmBooking,
+        bookingAdvanceDays: settings.value.bookingAdvanceDays,
+        bookingCancelHours: settings.value.bookingCancelHours,
+        requireDeposit: settings.value.requireDeposit,
+        depositPercentage: settings.value.depositPercentage
+      }
+    })
+
+    savedBooking.value = true
+    setTimeout(() => { savedBooking.value = false }, 3000)
+  } catch (error) {
+    console.error('Erro ao salvar configurações de agendamento:', error)
+    alert('Erro ao salvar configurações de agendamento')
+  } finally {
+    savingBooking.value = false
   }
 }
 

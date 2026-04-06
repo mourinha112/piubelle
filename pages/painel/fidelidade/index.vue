@@ -4,10 +4,10 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-display font-semibold text-gray-800">Programa de Fidelidade</h1>
-        <p class="text-gray-500">Recompense seus clientes fiéis</p>
+        <p class="text-gray-500">Recompense seus clientes fieis</p>
       </div>
-      <button 
-        @click="showConfigModal = true"
+      <button
+        @click="openConfigModal"
         class="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 transition-all shadow-glow"
       >
         <Icon name="lucide:settings" class="w-5 h-5" />
@@ -58,7 +58,7 @@
             <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
               <Icon name="lucide:trophy" class="w-6 h-6" />
             </div>
-            <span class="text-emerald-100">Próximos a ganhar</span>
+            <span class="text-emerald-100">Proximos a ganhar</span>
           </div>
           <p class="text-3xl font-bold">{{ stats.closeToReward }}</p>
         </div>
@@ -67,13 +67,13 @@
       <!-- Current Program -->
       <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
         <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Programa Ativo</h2>
-        
+
         <div v-if="!program.isActive" class="text-center py-8">
           <Icon name="lucide:gift" class="w-12 h-12 text-lilac-300 mx-auto mb-3" />
           <p class="text-gray-500">Nenhum programa de fidelidade ativo</p>
-          <p class="text-sm text-gray-400 mt-1">Configure um programa para começar a fidelizar seus clientes</p>
-          <button 
-            @click="showConfigModal = true"
+          <p class="text-sm text-gray-400 mt-1">Configure um programa para comecar a fidelizar seus clientes</p>
+          <button
+            @click="openConfigModal"
             class="mt-4 px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium"
           >
             Criar Programa
@@ -94,7 +94,7 @@
 
             <div class="space-y-3">
               <div class="flex items-center justify-between">
-                <span class="text-gray-600">Pontos necessários</span>
+                <span class="text-gray-600">Pontos necessarios</span>
                 <span class="font-semibold text-gray-800">{{ program.pointsRequired }}</span>
               </div>
               <div class="flex items-center justify-between">
@@ -109,23 +109,23 @@
           </div>
 
           <div class="flex-1">
-            <h4 class="font-medium text-gray-800 mb-4">Visualização do Cartão</h4>
+            <h4 class="font-medium text-gray-800 mb-4">Visualizacao do Cartao</h4>
             <div class="p-6 rounded-2xl bg-gradient-to-br from-lilac-50 to-rose-50 border border-lilac-200">
               <div class="flex items-center justify-between mb-4">
                 <span class="font-display text-lg font-semibold text-lilac-700">PiuBelle</span>
-                <span class="text-sm text-gray-500">Cartão Fidelidade</span>
+                <span class="text-sm text-gray-500">Cartao Fidelidade</span>
               </div>
               <div class="grid grid-cols-5 gap-2">
-                <div 
-                  v-for="i in program.pointsRequired" 
+                <div
+                  v-for="i in program.pointsRequired"
                   :key="i"
                   class="aspect-square rounded-xl border-2 border-dashed border-lilac-300 flex items-center justify-center"
                   :class="i <= previewPoints ? 'bg-gradient-to-br from-lilac-400 to-rose-400 border-solid' : ''"
                 >
-                  <Icon 
+                  <Icon
                     v-if="i <= previewPoints"
-                    name="lucide:check" 
-                    class="w-5 h-5 text-white" 
+                    name="lucide:check"
+                    class="w-5 h-5 text-white"
                   />
                   <span v-else class="text-lilac-300 text-lg">{{ i }}</span>
                 </div>
@@ -138,20 +138,20 @@
 
       <!-- Top Clients -->
       <div class="p-6 rounded-2xl bg-white border border-lilac-100 shadow-soft">
-        <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Clientes Mais Fiéis</h2>
-        
+        <h2 class="font-display text-xl font-semibold text-gray-800 mb-6">Clientes Mais Fieis</h2>
+
         <div v-if="topClients.length === 0" class="text-center py-8">
           <Icon name="lucide:users" class="w-10 h-10 text-gray-300 mx-auto mb-2" />
           <p class="text-gray-500">Nenhum cliente no programa ainda</p>
         </div>
 
         <div v-else class="space-y-3">
-          <div 
+          <div
             v-for="(client, index) in topClients"
             :key="client.id"
             class="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-lilac-50/50 transition-colors"
           >
-            <div 
+            <div
               class="w-8 h-8 rounded-lg flex items-center justify-center font-bold"
               :class="index < 3 ? 'bg-gradient-to-br from-amber-400 to-amber-500 text-white' : 'bg-gray-200 text-gray-600'"
             >
@@ -174,46 +174,46 @@
     </template>
 
     <!-- Config Modal -->
-    <div 
-      v-if="showConfigModal" 
+    <div
+      v-if="showConfigModal"
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       @click.self="showConfigModal = false"
     >
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-md" @click.stop>
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
           <h3 class="text-xl font-display font-semibold text-gray-800">Configurar Programa</h3>
-          <button 
+          <button
             @click="showConfigModal = false"
             class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <Icon name="lucide:x" class="w-5 h-5 text-gray-500" />
           </button>
         </div>
-        
+
         <div class="p-6 space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Programa</label>
-            <input 
+            <input
               v-model="programConfig.name"
               type="text"
-              placeholder="Ex: Cartão Fidelidade PiuBelle"
+              placeholder="Ex: Cartao Fidelidade PiuBelle"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
-            <input 
+            <label class="block text-sm font-medium text-gray-700 mb-2">Descricao</label>
+            <input
               v-model="programConfig.description"
               type="text"
               placeholder="Ex: Complete 10 visitas e ganhe!"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Pontos necessários</label>
-            <input 
+            <label class="block text-sm font-medium text-gray-700 mb-2">Pontos necessarios</label>
+            <input
               v-model.number="programConfig.pointsRequired"
               type="number"
               min="1"
@@ -221,20 +221,20 @@
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Nome da recompensa</label>
-            <input 
+            <input
               v-model="programConfig.rewardName"
               type="text"
-              placeholder="Ex: Corte Grátis"
+              placeholder="Ex: Corte Gratis"
               class="w-full px-4 py-3 rounded-xl border border-lilac-100 focus:border-lilac-300 outline-none"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Valor da recompensa (R$)</label>
-            <input 
+            <input
               v-model.number="programConfig.rewardValue"
               type="number"
               min="0"
@@ -244,7 +244,7 @@
           </div>
 
           <div class="flex items-center gap-3">
-            <input 
+            <input
               v-model="programConfig.isActive"
               type="checkbox"
               id="isActive"
@@ -253,15 +253,15 @@
             <label for="isActive" class="text-sm text-gray-700">Programa ativo</label>
           </div>
         </div>
-        
+
         <div class="p-6 border-t border-gray-100 flex gap-3 justify-end">
-          <button 
+          <button
             @click="showConfigModal = false"
             class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all"
           >
             Cancelar
           </button>
-          <button 
+          <button
             @click="saveProgram"
             :disabled="saving"
             class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-lilac-500 to-rose-500 text-white font-medium hover:from-lilac-600 hover:to-rose-600 transition-all disabled:opacity-50"
@@ -279,8 +279,8 @@ definePageMeta({
   layout: 'painel'
 })
 
-const { authHeaders } = useAuth()
-const currentSalon = inject('currentSalon') as Ref<any>
+const { currentSalon } = useAuth()
+const { api } = useApi()
 
 const loading = ref(true)
 const saving = ref(false)
@@ -304,15 +304,23 @@ const program = ref({
 })
 
 const programConfig = ref({
-  name: 'Cartão Fidelidade PiuBelle',
-  description: 'Complete 10 visitas e ganhe um serviço grátis!',
+  name: 'Cartao Fidelidade PiuBelle',
+  description: 'Complete 10 visitas e ganhe um servico gratis!',
   pointsRequired: 10,
-  rewardName: 'Corte Grátis',
+  rewardName: 'Corte Gratis',
   rewardValue: 80,
   isActive: true
 })
 
 const topClients = ref<any[]>([])
+
+const openConfigModal = () => {
+  // Pre-fill config from current program if active
+  if (program.value.isActive) {
+    programConfig.value = { ...program.value }
+  }
+  showConfigModal.value = true
+}
 
 const loadLoyaltyData = async () => {
   if (!currentSalon.value?.id) {
@@ -322,30 +330,38 @@ const loadLoyaltyData = async () => {
 
   loading.value = true
   try {
-    const res = await $fetch(`/api/painel/loyalty?salonId=${currentSalon.value.id}`, {
-      headers: authHeaders.value
+    const { data: res, error } = await api<any>('/api/painel/loyalty', {
+      params: { salonId: currentSalon.value.id }
     })
-    
-    if ((res as any).success) {
-      const data = (res as any).data || {}
-      
+
+    if (!error && res) {
+      const data = res.data || res || {}
+
       if (data.program) {
         program.value = {
-          isActive: data.program.isActive,
-          name: data.program.name,
-          description: data.program.description,
-          pointsRequired: data.program.pointsRequired,
-          rewardName: data.program.rewardName,
-          rewardValue: data.program.rewardValue
+          isActive: data.program.isActive ?? false,
+          name: data.program.name || '',
+          description: data.program.description || '',
+          pointsRequired: data.program.pointsRequired || 10,
+          rewardName: data.program.rewardName || '',
+          rewardValue: data.program.rewardValue || 0
         }
         programConfig.value = { ...program.value }
       }
 
-      stats.value = data.stats || stats.value
+      if (data.stats) {
+        stats.value = {
+          participants: data.stats.participants || 0,
+          totalPoints: data.stats.totalPoints || 0,
+          rewardsRedeemed: data.stats.rewardsRedeemed || 0,
+          closeToReward: data.stats.closeToReward || 0
+        }
+      }
+
       topClients.value = data.topClients || []
     }
-  } catch (error) {
-    console.error('Erro ao carregar programa de fidelidade:', error)
+  } catch (err) {
+    console.error('Erro ao carregar programa de fidelidade:', err)
   } finally {
     loading.value = false
   }
@@ -356,19 +372,24 @@ const saveProgram = async () => {
 
   saving.value = true
   try {
-    await $fetch('/api/painel/loyalty', {
+    const { error } = await api('/api/painel/loyalty', {
       method: 'POST',
-      headers: authHeaders.value,
       body: {
         salonId: currentSalon.value.id,
         ...programConfig.value
       }
     })
-    
-    program.value = { ...programConfig.value }
-    showConfigModal.value = false
-  } catch (error) {
-    console.error('Erro ao salvar programa:', error)
+
+    if (!error) {
+      program.value = { ...programConfig.value }
+      showConfigModal.value = false
+      // Reload to get updated stats
+      await loadLoyaltyData()
+    } else {
+      console.error('Erro ao salvar programa:', error)
+    }
+  } catch (err) {
+    console.error('Erro ao salvar programa:', err)
   } finally {
     saving.value = false
   }
@@ -377,8 +398,4 @@ const saveProgram = async () => {
 watch(() => currentSalon.value?.id, () => {
   loadLoyaltyData()
 }, { immediate: true })
-
-onMounted(() => {
-  loadLoyaltyData()
-})
 </script>
